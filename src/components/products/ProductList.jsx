@@ -24,29 +24,15 @@ const StyledCard = styled(Card)(({ theme }) => ({
   '&:hover': {
     transform: 'translateY(-4px)',
     boxShadow: theme.shadows[8],
-    '& .hover-overlay': {
-      opacity: 1,
-    },
     '& .product-image': {
       transform: 'scale(1.05)',
+    },
+    '& .add-to-cart-btn': {
+      opacity: 1,
+      transform: 'translateY(0)',
     }
   }
 }));
-
-const HoverOverlay = styled(Box)({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  opacity: 0,
-  transition: 'opacity 0.3s ease-in-out',
-  zIndex: 2,
-});
 
 const ProductImage = styled(CardMedia)({
   transition: 'transform 0.3s ease-in-out',
@@ -64,6 +50,11 @@ const AddToCartButton = styled(Button)({
   borderRadius: '25px',
   textTransform: 'none',
   fontWeight: 600,
+  width: '100%',
+  marginTop: '12px',
+  opacity: 0,
+  transform: 'translateY(10px)',
+  transition: 'all 0.3s ease-in-out',
 });
 
 const CustomPagination = styled(Pagination)({
@@ -458,17 +449,6 @@ const ProductTable = () => {
                       e.target.src = 'https://via.placeholder.com/300x220?text=Product+Image';
                     }}
                   />
-                  
-                  {/* Hover Overlay with Add to Cart Button */}
-                  <HoverOverlay className="hover-overlay">
-                    <AddToCartButton
-                      variant="contained"
-                      onClick={() => handleAddToCart(product)}
-                      size="large"
-                    >
-                      Add to Cart
-                    </AddToCartButton>
-                  </HoverOverlay>
                 </Box>
                 
                 {/* Product Details */}
@@ -505,6 +485,16 @@ const ProductTable = () => {
                       MOQ: {product.moq.toLocaleString()} units
                     </Typography>
                   </Box>
+
+                  {/* Add to Cart Button - Shows on hover */}
+                  <AddToCartButton
+                    className="add-to-cart-btn"
+                    variant="contained"
+                    onClick={() => handleAddToCart(product)}
+                    size="large"
+                  >
+                    Add to Cart
+                  </AddToCartButton>
                 </CardContent>
               </StyledCard>
             </CustomGridItem>
