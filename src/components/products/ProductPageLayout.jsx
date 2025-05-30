@@ -3,7 +3,7 @@ import FilteredSidebar from "./FilteredSidebar";
 import ProductList from "./ProductList";
 import { useState } from "react";
 
-const ProductPageLayout = () => {
+const ProductPageLayout = ({ onProductClick }) => {
     const [filters, setFilters] = useState({});
 
     const handleFiltersChange = (newFilters) => {
@@ -20,10 +20,10 @@ const ProductPageLayout = () => {
             </Box>
 
             <Box flex={1} p={2}>
-                <ProductList />
+                <ProductList onProductClick={onProductClick} />
             </Box>
         </Box>
-    )
-}
+    );
+};
 
 export default ProductPageLayout;

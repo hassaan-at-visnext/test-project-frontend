@@ -25,6 +25,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   flexDirection: 'column',
   transition: 'all 0.3s ease-in-out',
   position: 'relative',
+  cursor: 'pointer',
   '&:hover': {
     transform: 'translateY(-4px)',
     boxShadow: theme.shadows[8],
@@ -40,9 +41,10 @@ const StyledCard = styled(Card)(({ theme }) => ({
 
 const ProductImage = styled(CardMedia)({
   transition: 'transform 0.3s ease-in-out',
-  width: '100%',
+  width: '80%',
   height: '220px',
   objectFit: 'cover',
+  margin: '0 auto'
 });
 
 const AddToCartButton = styled(Button)({
@@ -85,7 +87,7 @@ const CustomGridItem = styled(Box)({
   },
 });
 
-const ProductTable = () => {
+const ProductTable = ({ onProductClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -311,9 +313,16 @@ const ProductTable = () => {
   const endIndex = startIndex + itemsPerPage;
   const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = (e, product) => {
+    e.stopPropagation(); // Prevent card click when clicking add to cart
     // TODO: Implement actual cart functionality
     alert(`Added ${product.name} to cart!`);
+  };
+
+  const handleCardClick = (productId) => {
+    if (onProductClick) {
+      onProductClick(productId);
+    }
   };
 
   const handlePageChange = (event, value) => {
@@ -387,11 +396,11 @@ const ProductTable = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
-      <Paper elevation={0} sx={{ p: 4 }}>
+      {/* <Paper elevation={0} sx={{ p: 4 }}> */}
         {/* Header */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <img src={boxes} style={{ width: "30px" }} alt="Products" />
-          {totalPages > 1 && (
+          {/* {totalPages > 1 && ( */}
             <CustomPagination
               count={totalPages}
               page={currentPage}
@@ -399,7 +408,7 @@ const ProductTable = () => {
               color="primary"
               size="large"
             />
-          )}
+          {/* )} */}
         </Box>
 
         {/* Product Count */}
@@ -416,7 +425,7 @@ const ProductTable = () => {
         <Box display="flex" flexWrap="wrap" mb={4}>
           {currentProducts.map((product) => (
             <CustomGridItem key={product.product_id}>
-              <StyledCard>
+              <StyledCard onClick={() => handleCardClick(product.product_id)}>
                 <Box position="relative">
                   <ProductImage
                     className="product-image"
@@ -465,7 +474,7 @@ const ProductTable = () => {
                   <AddToCartButton
                     className="add-to-cart-btn"
                     variant="contained"
-                    onClick={() => handleAddToCart(product)}
+                    onClick={(e) => handleAddToCart(e, product)}
                     size="large"
                   >
                     Add to Cart
@@ -488,7 +497,7 @@ const ProductTable = () => {
             />
           </Box>
         )}
-      </Paper>
+      {/* </Paper> */}
     </Container>
   );
 };
