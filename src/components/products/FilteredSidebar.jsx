@@ -1,11 +1,11 @@
-import { 
-    Checkbox, 
-    Box, 
-    CircularProgress, 
-    FormControlLabel, 
-    FormGroup, 
-    InputAdornment, 
-    TextField, 
+import {
+    Checkbox,
+    Box,
+    CircularProgress,
+    FormControlLabel,
+    FormGroup,
+    InputAdornment,
+    TextField,
     Typography,
     Alert,
     List,
@@ -16,9 +16,10 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useCategory } from "../../context/CategoryContext";
+import { useFilter } from "../../context/FilterContext";
 import axios from "axios";
 
-const FilteredSidebar = ({ onFiltersChange }) => {
+const FilteredSidebar = () => {
 
     const certifications = [
         "FDA",
@@ -53,7 +54,6 @@ const FilteredSidebar = ({ onFiltersChange }) => {
         "Korea"
     ];
 
-
     // Categories and Subcategoires states start 
     const [searchTerm, setSearchTerm] = useState('');
     const [allCategoriesData, setAllCategoiresData] = useState([]);
@@ -66,19 +66,13 @@ const FilteredSidebar = ({ onFiltersChange }) => {
     // Context usage 
     const { Authorization, isAuthenticated } = useAuth();
     const { selectedCategory, setCategoryAndSubcategory } = useCategory();
-
-    const [minPrice, setMinPrice] = useState(0);
-    const [maxPrice, setMaxPrice] = useState(2400);
-    const [moq, setMoq] = useState(''); // Fixed: Changed from null to empty string
-    const [stockInUSA, setStockInUSA] = useState(false);
+    const { filters, updateFilters } = useFilter();
 
     // Supplier Certifications States & Logic starts
-    const [checkedSupplierCerts, setCheckedSupplierCerts] = useState([]);
     const [searchSupplierCerts, setSearchSupplierCerts] = useState("");
     // Supplier Certifications States & Logic ends
 
     // Certifications States & logic starts 
-    const [checkedCerts, setCheckedCerts] = useState([]);
     const [searchCerts, setSearchCerts] = useState("");
     const [showAllCerts, setShowAllCerts] = useState(false);
 
@@ -87,7 +81,11 @@ const FilteredSidebar = ({ onFiltersChange }) => {
 
     const handleCertCheckboxChange = (event) => {
         const { name, checked } = event.target;
-        setCheckedCerts((prev) => checked ? [...prev, name] : prev.filter((cert) => cert !== name));
+        const newCertifications = checked 
+            ? [...filters.selectedCertifications, name] 
+            : filters.selectedCertifications.filter((cert) => cert !== name);
+        
+        updateFilters({ selectedCertifications: newCertifications });
     };
 
     const handleSearchCertsChange = (event) => {
@@ -96,8 +94,6 @@ const FilteredSidebar = ({ onFiltersChange }) => {
     // Certifications States & logic ends
 
     // Manufacturer Location Logic start
-    // Add at top with other useState declarations
-    const [checkedLocations, setCheckedLocations] = useState([]);
     const [searchLocation, setSearchLocation] = useState("");
     const [showAllLocations, setShowAllLocations] = useState(false);
 
@@ -108,9 +104,40 @@ const FilteredSidebar = ({ onFiltersChange }) => {
 
     const handleLocationCheckboxChange = (event) => {
         const { name, checked } = event.target;
-        setCheckedLocations(prev =>
-            checked ? [...prev, name] : prev.filter(item => item !== name)
-        );
+        const newLocations = checked 
+            ? [...filters.selectedManufacturerLocations, name] 
+            : filters.selectedManufacturerLocations.filter(item => item !== name);
+        
+        updateFilters({ selectedManufacturerLocations: newLocations });
+    };
+
+    // Handle price changes
+    const handleMinPriceChange = (e) => {
+        updateFilters({ minPrice: e.target.value || 0 });
+    };
+
+    const handleMaxPriceChange = (e) => {
+        updateFilters({ maxPrice: e.target.value || 0 });
+    };
+
+    // Handle MOQ change
+    const handleMoqChange = (e) => {
+        updateFilters({ moq: e.target.value });
+    };
+
+    // Handle supplier certifications
+    const handleSupplierCertChange = (event) => {
+        const { name, checked } = event.target;
+        const newSupplierCerts = checked 
+            ? [...filters.selectedSupplierCertifications, name] 
+            : filters.selectedSupplierCertifications.filter((item) => item !== name);
+        
+        updateFilters({ selectedSupplierCertifications: newSupplierCerts });
+    };
+
+    // Handle stock in USA
+    const handleStockChange = (e) => {
+        updateFilters({ stockInUSA: e.target.checked });
     };
 
     useEffect(() => {
@@ -126,7 +153,6 @@ const FilteredSidebar = ({ onFiltersChange }) => {
                     }
                 });
 
-                // Fixed: axios response already contains data, no need for response.json()
                 const data = response.data;
                 if (data.success) {
                     setAllCategoiresData(data.data);
@@ -141,7 +167,7 @@ const FilteredSidebar = ({ onFiltersChange }) => {
         }
 
         fetchCategoriesData();
-    }, [Authorization]); // Added Authorization as dependency
+    }, [Authorization]);
 
     // Reset Search when category changes
     useEffect(() => {
@@ -158,7 +184,7 @@ const FilteredSidebar = ({ onFiltersChange }) => {
         }
 
         const categoryData = allCategoriesData.find(
-            cat => cat.category_id === selectedCategory.category_id // Fixed: changed category_id to cat.category_id
+            cat => cat.category_id === selectedCategory.category_id
         );
 
         if (!categoryData || !categoryData.subcategories) {
@@ -174,32 +200,6 @@ const FilteredSidebar = ({ onFiltersChange }) => {
         setFilteredSubcategories(filtered);
     }, [selectedCategory, allCategoriesData, searchTerm]);
 
-    // Send filters to Parent Component
-    useEffect(() => {
-        const filters = {
-            minPrice: minPrice.toString().trim(),
-            maxPrice: maxPrice.toString().trim(),
-            moq: moq ? moq.toString().trim() : '',
-            selectedCertifications: checkedCerts,
-            selectedSupplierCertifications: checkedSupplierCerts,
-            selectedManufacturerLocations: checkedLocations,
-            stockInUSA
-        };
-
-        if (onFiltersChange) {
-            onFiltersChange(filters);
-        }
-    }, [
-        minPrice,
-        maxPrice,
-        moq,
-        checkedCerts,
-        checkedSupplierCerts,
-        checkedLocations,
-        stockInUSA,
-        onFiltersChange
-    ]);
-
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
     };
@@ -211,7 +211,6 @@ const FilteredSidebar = ({ onFiltersChange }) => {
         console.log('Selected subcategory:', subcategory);
         console.log('From category:', selectedCategory.name);
     };
-
 
     // Render functions for categories/subcategories
     const renderSubcategories = () => {
@@ -326,15 +325,13 @@ const FilteredSidebar = ({ onFiltersChange }) => {
             </Box>
         );
     };
-   
 
-    // Manufacturer Location Logic ends
     return (
         <>
             {/* More Categories Search Bar */}
-            <TextField 
-                size="small" 
-                fullWidth 
+            <TextField
+                size="small"
+                fullWidth
                 placeholder="More Categories"
                 value={searchTerm}
                 onChange={handleSearchChange}
@@ -359,14 +356,22 @@ const FilteredSidebar = ({ onFiltersChange }) => {
                     Price
                 </Typography>
                 <Box display="flex" alignItems="center" gap={1}>
-                    <TextField value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="from" size="small"
+                    <TextField 
+                        value={filters.minPrice} 
+                        onChange={handleMinPriceChange} 
+                        placeholder="from" 
+                        size="small"
                         sx={{ width: "45%", borderRadius: "50px", backgroundColor: "#F2F2F2", '& .MuiOutlinedInput-root': { borderRadius: "20px", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
                         inputProps={{ inputMode: 'numeric', pattern: '\\d*' }}
                         InputProps={{ endAdornment: <InputAdornment position="end">$</InputAdornment> }} />
 
                     <Typography variant="body1">-</Typography>
 
-                    <TextField value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="to" size="small"
+                    <TextField 
+                        value={filters.maxPrice} 
+                        onChange={handleMaxPriceChange} 
+                        placeholder="to" 
+                        size="small"
                         sx={{ width: "45%", borderRadius: "50px", backgroundColor: "#F2F2F2", '& .MuiOutlinedInput-root': { borderRadius: "50px", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
                         inputProps={{ inputMode: 'numeric', pattern: '\\d*' }}
                         InputProps={{ endAdornment: <InputAdornment position="end">$</InputAdornment> }} />
@@ -380,15 +385,26 @@ const FilteredSidebar = ({ onFiltersChange }) => {
                 <Typography gutterBottom>
                     MOQ
                 </Typography>
-                <TextField value={moq} onChange={(e) => setMoq(e.target.value)} size="small" placeholder="less than"
-                    sx={{ width: '100%', borderRadius: "50px", backgroundColor: "#F2F2F2", '& .MuiOutlinedInput-root': { borderRadius: "50px", backgroundColor: "#F2F2F2", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }} inputProps={{ style: { textAlign: 'center' }, inputMode: 'numeric', pattern: '\\d*' }} />
+                <TextField 
+                    value={filters.moq} 
+                    onChange={handleMoqChange} 
+                    size="small" 
+                    placeholder="less than"
+                    sx={{ width: '100%', borderRadius: "50px", backgroundColor: "#F2F2F2", '& .MuiOutlinedInput-root': { borderRadius: "50px", backgroundColor: "#F2F2F2", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }} 
+                    inputProps={{ style: { textAlign: 'center' }, inputMode: 'numeric', pattern: '\\d*' }} 
+                />
             </Box>
             {/* MOQ Filter Ends */}
 
             {/* Product Certification start */}
             <Box mt={3}>
                 <Typography gutterBottom>Product Certification</Typography>
-                <TextField size="small" fullWidth placeholder="Product Certifications..." value={searchCerts} onChange={handleSearchCertsChange}
+                <TextField 
+                    size="small" 
+                    fullWidth 
+                    placeholder="Product Certifications..." 
+                    value={searchCerts} 
+                    onChange={handleSearchCertsChange}
                     sx={{ "& .MuiOutlinedInput-root": { borderRadius: "20px", backgroundColor: "#F2F2F2", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
                     InputProps={{
                         endAdornment: (
@@ -406,9 +422,8 @@ const FilteredSidebar = ({ onFiltersChange }) => {
                         <FormControlLabel key={cert} control={
                             <Checkbox
                                 name={cert}
-                                checked={checkedCerts.includes(cert)}
+                                checked={filters.selectedCertifications.includes(cert)}
                                 onChange={handleCertCheckboxChange}
-                            // size="small"
                             />
                         }
                             label={cert}
@@ -428,7 +443,12 @@ const FilteredSidebar = ({ onFiltersChange }) => {
             {/* Supplier Certifications Start */}
             <Box mt={3}>
                 <Typography gutterBottom>Supplier Certification</Typography>
-                <TextField size="small" fullWidth placeholder="Supplier Certifications..." value={searchSupplierCerts} onChange={(e) => setSearchSupplierCerts(e.target.value)}
+                <TextField 
+                    size="small" 
+                    fullWidth 
+                    placeholder="Supplier Certifications..." 
+                    value={searchSupplierCerts} 
+                    onChange={(e) => setSearchSupplierCerts(e.target.value)}
                     sx={{ "& .MuiOutlinedInput-root": { borderRadius: "20px", backgroundColor: "#F2F2F2", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
                     InputProps={{
                         endAdornment: (
@@ -443,12 +463,12 @@ const FilteredSidebar = ({ onFiltersChange }) => {
                 />
                 <FormGroup sx={{ mt: 2 }}>
                     {supplierCertificaitons.filter(cert => cert.toLowerCase().includes(searchSupplierCerts.toLowerCase())).map(cert => (
-                        <FormControlLabel key={cert} control={<Checkbox name={cert} checked={checkedSupplierCerts.includes(cert)}
-                            onChange={(event) => {
-                                const { name, checked } = event.target;
-                                setCheckedSupplierCerts((prev) => checked ? [...prev, name] : prev.filter((item) => item !== name));
-                            }}
-                        />
+                        <FormControlLabel key={cert} control={
+                            <Checkbox 
+                                name={cert} 
+                                checked={filters.selectedSupplierCertifications.includes(cert)}
+                                onChange={handleSupplierCertChange}
+                            />
                         }
                             label={cert}
                             sx={{ "& .MuiFormControlLabel-label": { fontSize: "0.8rem" }, marginBottom: "0px" }}
@@ -462,9 +482,9 @@ const FilteredSidebar = ({ onFiltersChange }) => {
             {/* Manufacturer Location starts */}
             <Box mt={3}>
                 <Typography gutterBottom>Manufacturer Location</Typography>
-                <TextField 
-                    size="small" 
-                    fullWidth 
+                <TextField
+                    size="small"
+                    fullWidth
                     placeholder="Country/Region"
                     value={searchLocation}
                     onChange={(e) => setSearchLocation(e.target.value)}
@@ -487,7 +507,7 @@ const FilteredSidebar = ({ onFiltersChange }) => {
                             control={
                                 <Checkbox
                                     name={loc}
-                                    checked={checkedLocations.includes(loc)}
+                                    checked={filters.selectedManufacturerLocations.includes(loc)}
                                     onChange={handleLocationCheckboxChange}
                                 />
                             }
@@ -520,8 +540,8 @@ const FilteredSidebar = ({ onFiltersChange }) => {
                 <FormControlLabel
                     control={
                         <Checkbox
-                            checked={stockInUSA}
-                            onChange={(e) => setStockInUSA(e.target.checked)}
+                            checked={filters.stockInUSA}
+                            onChange={handleStockChange}
                             size="small"
                         />
                     }

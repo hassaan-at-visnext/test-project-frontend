@@ -294,15 +294,23 @@ const ProductTable = () => {
         {/* Header */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <img src={boxes} style={{ width: "30px" }} alt="Products" />
-          {totalPages > 1 && (
+          {/* {totalPages > 1 && ( 
+            // <CustomPagination 
+            //   count={totalPages}
+            //   page={currentPage}
+            //   onChange={handlePageChange}
+            //   color="primary"
+            //   size="large"
+            // />
+            */}
             <CustomPagination
-              count={totalPages}
+              count={Math.max(totalPages, 2)} // Force at least 2 pages
               page={currentPage}
               onChange={handlePageChange}
               color="primary"
               size="large"
             />
-          )}
+          {/* )} */}
         </Box>
 
         {/* Product Count */}
