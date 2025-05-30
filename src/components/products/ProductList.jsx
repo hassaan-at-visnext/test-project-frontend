@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -6,13 +6,16 @@ import {
   CardMedia,
   Typography,
   Button,
-  Grid,
   Pagination,
   Container,
   Paper,
-  Chip
+  Chip,
+  CircularProgress
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import axios from 'axios';
+import { useCategory } from '../../context/CategoryContext';
+import { useAuth } from '../../context/AuthContext';
 import boxes from "../../assets/icons8-boxes-90.png";
 
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -69,7 +72,6 @@ const CustomPagination = styled(Pagination)({
   }
 });
 
-// Custom Grid Item with exact 33.33% width
 const CustomGridItem = styled(Box)({
   width: '33.333333%',
   padding: '12px',
@@ -84,317 +86,142 @@ const CustomGridItem = styled(Box)({
 
 const ProductTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12; // 3x4 grid
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const itemsPerPage = 12;
 
-  // Expanded sample data with more products
-  const products = [
-    {
-      product_id: 3,
-      name: "KN95 Protective Mask",
-      price: "1.20",
-      moq: 6000,
-      stock: 9500,
-      availability: true,
-      subcategory_id: 42,
-      description: "High-efficiency KN95 mask with 5-layer protection, soft ear loops, and adjustable nose bridge.",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://tbh-production.s3.ap-southeast-1.amazonaws.com/Product/524988735/Images/1617516013158993854.jpg",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 4,
-      name: "Surgical Gown",
-      price: "2.80",
-      moq: 3000,
-      stock: 5400,
-      availability: true,
-      subcategory_id: 43,
-      description: "Disposable surgical gown made of SMS fabric, fluid-resistant, with knit cuffs and belt.",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://www.penninehealthcare.co.uk/wp-content/uploads/2021/11/AE12772-AE12777-AE12778-AE12779-AE12780-AE12781_1-1024x1024.jpg",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 5,
-      name: "Face Shield",
-      price: "0.80",
-      moq: 7000,
-      stock: 12000,
-      availability: true,
-      subcategory_id: 43,
-      description: "Anti-fog face shield with elastic band and foam headband for full facial protection.",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://tbh-production.s3.ap-southeast-1.amazonaws.com/Product/1594109791/Images/16103431541142702878.jpg",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 2,
-      name: "Warning Clothing",
-      price: "1.90",
-      moq: 4000,
-      stock: 8760,
-      availability: true,
-      subcategory_id: 43,
-      description: "Disposable non-woven membrane waterproof shoe cover",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://tbh-production.s3.ap-southeast-1.amazonaws.com/Product/875911896/Images/1600931702339907497.jpg",
-      created_at: "2025-05-26T07:09:15.715Z",
-      updated_at: "2025-05-26T07:09:15.715Z"
-    },
-    {
-      product_id: 6,
-      name: "N95 Respirator",
-      price: "1.50",
-      moq: 5000,
-      stock: 10051,
-      availability: true,
-      subcategory_id: 42,
-      description: "50 Kimtech N95 Pouch Respirators made by Kimberly-Clark, Universal Size",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://tbh-production.s3.ap-southeast-1.amazonaws.com/Product/765516787/Images/16100801891628794223.jpg",
-      created_at: "2025-05-26T06:59:56.821Z",
-      updated_at: "2025-05-26T06:59:56.821Z"
-    },
-    {
-      product_id: 7,
-      name: "KN95 Protective Mask Pro",
-      price: "1.20",
-      moq: 6000,
-      stock: 9500,
-      availability: true,
-      subcategory_id: 42,
-      description: "High-efficiency KN95 mask with 5-layer protection, soft ear loops, and adjustable nose bridge.",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://tbh-production.s3.ap-southeast-1.amazonaws.com/Product/524988735/Images/1617516013158993854.jpg",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 8,
-      name: "Premium Surgical Gown",
-      price: "2.80",
-      moq: 3000,
-      stock: 5400,
-      availability: true,
-      subcategory_id: 43,
-      description: "Disposable surgical gown made of SMS fabric, fluid-resistant, with knit cuffs and belt.",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://www.penninehealthcare.co.uk/wp-content/uploads/2021/11/AE12772-AE12777-AE12778-AE12779-AE12780-AE12781_1-1024x1024.jpg",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 9,
-      name: "Anti-Fog Face Shield",
-      price: "0.80",
-      moq: 7000,
-      stock: 12000,
-      availability: true,
-      subcategory_id: 43,
-      description: "Anti-fog face shield with elastic band and foam headband for full facial protection.",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://tbh-production.s3.ap-southeast-1.amazonaws.com/Product/1594109791/Images/16103431541142702878.jpg",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 12,
-      name: "Safety Shoe Cover",
-      price: "1.90",
-      moq: 4000,
-      stock: 8760,
-      availability: true,
-      subcategory_id: 43,
-      description: "Disposable non-woven membrane waterproof shoe cover",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://tbh-production.s3.ap-southeast-1.amazonaws.com/Product/875911896/Images/1600931702339907497.jpg",
-      created_at: "2025-05-26T07:09:15.715Z",
-      updated_at: "2025-05-26T07:09:15.715Z"
-    },
-    {
-      product_id: 11,
-      name: "Professional N95",
-      price: "1.50",
-      moq: 5000,
-      stock: 10051,
-      availability: true,
-      subcategory_id: 42,
-      description: "50 Kimtech N95 Pouch Respirators made by Kimberly-Clark, Universal Size",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://tbh-production.s3.ap-southeast-1.amazonaws.com/Product/765516787/Images/16100801891628794223.jpg",
-      created_at: "2025-05-26T06:59:56.821Z",
-      updated_at: "2025-05-26T06:59:56.821Z"
-    },
-    {
-      product_id: 13,
-      name: "Medical Gloves",
-      price: "0.15",
-      moq: 10000,
-      stock: 50000,
-      availability: true,
-      subcategory_id: 44,
-      description: "Disposable nitrile medical gloves, powder-free, textured fingertips",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=220&fit=crop",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 14,
-      name: "Isolation Gown",
-      price: "3.50",
-      moq: 2000,
-      stock: 3200,
-      availability: true,
-      subcategory_id: 43,
-      description: "Level 3 isolation gown with full back coverage and knit cuffs",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=220&fit=crop",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 15,
-      name: "Hand Sanitizer",
-      price: "2.25",
-      moq: 1000,
-      stock: 15000,
-      availability: true,
-      subcategory_id: 45,
-      description: "70% Alcohol hand sanitizer gel, 500ml bottle with pump dispenser",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=220&fit=crop",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 16,
-      name: "Safety Goggles",
-      price: "4.50",
-      moq: 1500,
-      stock: 2800,
-      availability: true,
-      subcategory_id: 43,
-      description: "Anti-fog safety goggles with elastic strap and ventilation",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=300&h=220&fit=crop",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 17,
-      name: "Disposable Caps",
-      price: "0.25",
-      moq: 8000,
-      stock: 25000,
-      availability: true,
-      subcategory_id: 43,
-      description: "Non-woven disposable bouffant caps, lightweight and breathable",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=300&h=220&fit=crop",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 18,
-      name: "Thermometer Digital",
-      price: "12.99",
-      moq: 500,
-      stock: 1200,
-      availability: true,
-      subcategory_id: 46,
-      description: "Non-contact infrared thermometer with LCD display",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=220&fit=crop",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 19,
-      name: "Medical Tape",
-      price: "1.75",
-      moq: 2000,
-      stock: 8500,
-      availability: true,
-      subcategory_id: 47,
-      description: "Hypoallergenic medical tape, 1 inch width, strong adhesive",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=220&fit=crop",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
-    },
-    {
-      product_id: 20,
-      name: "Pulse Oximeter",
-      price: "25.00",
-      moq: 200,
-      stock: 750,
-      availability: true,
-      subcategory_id: 46,
-      description: "Fingertip pulse oximeter with OLED display, measures SpO2 and pulse rate",
-      product_certifications: ["FDA", "ASTM", "CE", "SGS"],
-      supplier_certifications: ["DUNS", "DRS", "GMP", "ISO 9001"],
-      manufacturer_location: "United States",
-      stock_availability_in_us: true,
-      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=300&h=220&fit=crop",
-      created_at: "2025-05-26T07:18:44.052Z",
-      updated_at: "2025-05-26T07:18:44.052Z"
+  const { selectedCategory, selectedSubcategory } = useCategory();
+  const { Authorization } = useAuth();
+
+  // API Base URL - adjust this to match your backend
+  const API_BASE_URL = 'http://localhost:5000/api/v1';
+
+  useEffect(() => {
+    if (selectedCategory && Authorization) {
+      fetchProducts();
     }
-  ];
+  }, [selectedCategory, selectedSubcategory, Authorization]);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
+    setCurrentPage(1);
+
+    try {
+      if (selectedSubcategory) {
+        await fetchProductsBySubcategory();
+      } else {
+        await fetchProductsByCategory();
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setError(err.response?.data?.message || 'Failed to fetch products');
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProductsByCategory = async () => {
+    try {
+      // Get all categories first
+      const categoriesResponse = await axios.get(`${API_BASE_URL}/categories`, {
+        headers: { 'Authorization': Authorization }
+      });
+
+      if (!categoriesResponse.data.success) {
+        throw new Error('Failed to fetch categories');
+      }
+
+      const categories = categoriesResponse.data.data;
+      // const category = categories.find(cat => 
+      //   cat.name.toLowerCase().trim() === selectedCategory.toLowerCase().trim()
+      // );
+      // Safely extract the category name
+      const selectedCategoryName =
+        typeof selectedCategory === 'string'
+          ? selectedCategory
+          : selectedCategory?.name ?? '';
+
+      // Compare with normalized names
+      const category = categories.find(cat =>
+        cat.name.toLowerCase().trim() === selectedCategoryName.toLowerCase().trim()
+      );
+
+
+      if (!category) {
+        throw new Error(`Category "${selectedCategory}" not found`);
+      }
+
+      // Fetch products by category ID
+      const productsResponse = await axios.get(`${API_BASE_URL}/products/category/${category.category_id}`, {
+        headers: { 'Authorization': Authorization }
+      });
+
+      if (productsResponse.data.success) {
+        setProducts(productsResponse.data.data || []);
+      } else {
+        setProducts([]);
+      }
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  const fetchProductsBySubcategory = async () => {
+    try {
+      // Get categories with subcategories
+      const categoriesSubcategoriesResponse = await axios.get(`${API_BASE_URL}/categories-subcategories`, {
+        headers: { 'Authorization': Authorization }
+      });
+
+      if (!categoriesSubcategoriesResponse.data.success) {
+        throw new Error('Failed to fetch categories and subcategories');
+      }
+
+      const data = categoriesSubcategoriesResponse.data.data;
+      let subcategoryId = null;
+
+      // Find the subcategory ID
+      for (const category of data) {
+        // if (category.name.toLowerCase().trim() === selectedCategory.toLowerCase().trim()) {
+        const selectedCategoryName =
+          typeof selectedCategory === 'string'
+            ? selectedCategory
+            : selectedCategory?.name ?? '';
+
+        if (category.name.toLowerCase().trim() === selectedCategoryName.toLowerCase().trim()) {
+
+          const subcategory = category.subcategories?.find(sub =>
+            sub.name.toLowerCase().trim() === selectedSubcategory.toLowerCase().trim()
+          );
+
+          if (subcategory) {
+            subcategoryId = subcategory.subcategory_id;
+            break;
+          }
+        }
+      }
+
+      if (!subcategoryId) {
+        throw new Error(`Subcategory "${selectedSubcategory}" not found in category "${selectedCategory}"`);
+      }
+
+      // Fetch products by subcategory ID
+      const productsResponse = await axios.get(`${API_BASE_URL}/products/subcategory/${subcategoryId}`, {
+        headers: { 'Authorization': Authorization }
+      });
+
+      if (productsResponse.data.success) {
+        setProducts(productsResponse.data.data || []);
+      } else {
+        setProducts([]);
+      }
+    } catch (err) {
+      throw err;
+    }
+  };
 
   // Calculate pagination
   const totalPages = Math.ceil(products.length / itemsPerPage);
@@ -403,6 +230,7 @@ const ProductTable = () => {
   const currentProducts = products.slice(startIndex, endIndex);
 
   const handleAddToCart = (product) => {
+    // TODO: Implement actual cart functionality
     alert(`Added ${product.name} to cart!`);
   };
 
@@ -410,55 +238,103 @@ const ProductTable = () => {
     setCurrentPage(value);
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
+        <Paper elevation={0} sx={{ p: 4 }}>
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+            <CircularProgress size={60} sx={{ color: '#00B2C9' }} />
+          </Box>
+        </Paper>
+      </Container>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
+        <Paper elevation={0} sx={{ p: 4 }}>
+          <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="400px">
+            <Typography variant="h6" color="error" mb={2}>
+              {error}
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={fetchProducts}
+              sx={{ backgroundColor: '#00B2C9', '&:hover': { backgroundColor: '#009BB0' } }}
+            >
+              Retry
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
+    );
+  }
+
+  // No products found
+  if (!loading && products.length === 0) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
+        <Paper elevation={0} sx={{ p: 4 }}>
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+            <Typography variant="h6" color="text.secondary">
+              No products found for this {selectedSubcategory ? 'subcategory' : 'category'}.
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    );
+  }
+
   return (
     <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
       <Paper elevation={0} sx={{ p: 4 }}>
-        {/* Header with Title and Pagination */}
+        {/* Header */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <img src={boxes} style={{ width: "30px"}}  />          
-          {/* Pagination - Top Right */}
-          <CustomPagination
-            count={totalPages}
-            page={currentPage}
-            onChange={handlePageChange}
-            color="primary"
-            size="large"
-          />
+          <img src={boxes} style={{ width: "30px" }} alt="Products" />
+          {totalPages > 1 && (
+            <CustomPagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+              size="large"
+            />
+          )}
         </Box>
 
-        {/* Product Count Info */}
+        {/* Product Count */}
         <Box textAlign="center" mb={4}>
           <Typography variant="body2" color="text.secondary">
             {startIndex + 1}-{Math.min(endIndex, products.length)} of {products.length} products
           </Typography>
         </Box>
-        
-        {/* Product Grid - Custom Layout for exact 33.33% width */}
+
+        {/* Product Grid */}
         <Box display="flex" flexWrap="wrap" mb={4}>
           {currentProducts.map((product) => (
             <CustomGridItem key={product.product_id}>
               <StyledCard>
-                {/* Product Image */}
                 <Box position="relative">
                   <ProductImage
                     className="product-image"
                     component="img"
-                    image={product.image}
+                    image={product.image || 'https://via.placeholder.com/300x220?text=Product+Image'}
                     alt={product.name}
                     onError={(e) => {
                       e.target.src = 'https://via.placeholder.com/300x220?text=Product+Image';
                     }}
                   />
                 </Box>
-                
-                {/* Product Details */}
+
                 <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  {/* Stock Status */}
                   <Box mb={1}>
                     <Chip
                       label={product.stock_availability_in_us ? 'In Stock' : 'Stock in USA'}
                       size="small"
-                      sx={{ 
+                      sx={{
                         backgroundColor: 'transparent',
                         color: 'black',
                         fontWeight: 500,
@@ -467,8 +343,8 @@ const ProductTable = () => {
                       }}
                     />
                   </Box>
-                  
-                  <Typography variant="h6" component="h3" fontWeight="600" mb={2} sx={{ 
+
+                  <Typography variant="h6" component="h3" fontWeight="600" mb={2} sx={{
                     display: '-webkit-box',
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
@@ -476,17 +352,16 @@ const ProductTable = () => {
                   }}>
                     {product.name}
                   </Typography>
-                  
+
                   <Box flexGrow={1}>
                     <Typography variant="h6" component="p" fontWeight="bold" color="black" mb={1}>
                       ${product.price}/Piece
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      MOQ: {product.moq.toLocaleString()} units
+                      MOQ: {product.moq?.toLocaleString() || 'N/A'} units
                     </Typography>
                   </Box>
 
-                  {/* Add to Cart Button - Shows on hover */}
                   <AddToCartButton
                     className="add-to-cart-btn"
                     variant="contained"
@@ -500,6 +375,19 @@ const ProductTable = () => {
             </CustomGridItem>
           ))}
         </Box>
+
+        {/* Bottom Pagination */}
+        {totalPages > 1 && (
+          <Box display="flex" justifyContent="center" mt={4}>
+            <CustomPagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+              size="large"
+            />
+          </Box>
+        )}
       </Paper>
     </Container>
   );
