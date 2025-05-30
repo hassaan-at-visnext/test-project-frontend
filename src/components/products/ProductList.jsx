@@ -16,6 +16,7 @@ import { styled } from '@mui/material/styles';
 import axios from 'axios';
 import { useCategory } from '../../context/CategoryContext';
 import { useAuth } from '../../context/AuthContext';
+import { useFilter } from '../../context/FilterContext';
 import boxes from "../../assets/icons8-boxes-90.png";
 
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -87,12 +88,14 @@ const CustomGridItem = styled(Box)({
 const ProductTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const itemsPerPage = 12;
 
   const { selectedCategory, selectedSubcategory } = useCategory();
   const { Authorization } = useAuth();
+  const { filters } = useFilter();
 
   // API Base URL - adjust this to match your backend
   const API_BASE_URL = 'http://localhost:5000/api/v1';
@@ -102,6 +105,90 @@ const ProductTable = () => {
       fetchProducts();
     }
   }, [selectedCategory, selectedSubcategory, Authorization]);
+
+  // Apply filters whenever products or filters change
+  useEffect(() => {
+    applyFilters();
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [products, filters]);
+
+  const applyFilters = () => {
+    let filtered = [...products];
+
+    // Price Filter
+    if (filters.minPrice > 0 || filters.maxPrice > 0) {
+      filtered = filtered.filter(product => {
+        const price = parseFloat(product.price) || 0;
+        const minPrice = parseFloat(filters.minPrice) || 0;
+        const maxPrice = parseFloat(filters.maxPrice) || Infinity;
+        
+        if (maxPrice === 0) {
+          return price >= minPrice;
+        }
+        return price >= minPrice && price <= maxPrice;
+      });
+    }
+
+    // MOQ Filter
+    if (filters.moq && filters.moq.toString().trim() !== '') {
+      const maxMoq = parseInt(filters.moq) || 0;
+      filtered = filtered.filter(product => {
+        const productMoq = parseInt(product.moq) || 0;
+        return productMoq <= maxMoq;
+      });
+    }
+
+    // Product Certifications Filter (AND condition - all selected must be present)
+    if (filters.selectedCertifications && filters.selectedCertifications.length > 0) {
+      filtered = filtered.filter(product => {
+        const productCerts = product.certifications || [];
+        // Convert to array if it's a string
+        const certsArray = Array.isArray(productCerts) 
+          ? productCerts 
+          : (typeof productCerts === 'string' ? productCerts.split(',').map(c => c.trim()) : []);
+        
+        return filters.selectedCertifications.every(selectedCert => 
+          certsArray.some(productCert => 
+            productCert.toLowerCase().includes(selectedCert.toLowerCase())
+          )
+        );
+      });
+    }
+
+    // Supplier Certifications Filter (AND condition - all selected must be present)
+    if (filters.selectedSupplierCertifications && filters.selectedSupplierCertifications.length > 0) {
+      filtered = filtered.filter(product => {
+        const supplierCerts = product.supplier_certifications || [];
+        // Convert to array if it's a string
+        const certsArray = Array.isArray(supplierCerts) 
+          ? supplierCerts 
+          : (typeof supplierCerts === 'string' ? supplierCerts.split(',').map(c => c.trim()) : []);
+        
+        return filters.selectedSupplierCertifications.every(selectedCert => 
+          certsArray.some(supplierCert => 
+            supplierCert.toLowerCase().includes(selectedCert.toLowerCase())
+          )
+        );
+      });
+    }
+
+    // Manufacturer Location Filter (OR condition - any selected location matches)
+    if (filters.selectedManufacturerLocations && filters.selectedManufacturerLocations.length > 0) {
+      filtered = filtered.filter(product => {
+        const productLocation = product.manufacturer_location || '';
+        return filters.selectedManufacturerLocations.some(selectedLocation => 
+          productLocation.toLowerCase().includes(selectedLocation.toLowerCase())
+        );
+      });
+    }
+
+    // Stock in USA Filter
+    if (filters.stockInUSA) {
+      filtered = filtered.filter(product => product.stock_availability_in_us === true);
+    }
+
+    setFilteredProducts(filtered);
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -118,6 +205,7 @@ const ProductTable = () => {
       console.error('Error fetching products:', err);
       setError(err.response?.data?.message || 'Failed to fetch products');
       setProducts([]);
+      setFilteredProducts([]);
     } finally {
       setLoading(false);
     }
@@ -135,9 +223,6 @@ const ProductTable = () => {
       }
 
       const categories = categoriesResponse.data.data;
-      // const category = categories.find(cat => 
-      //   cat.name.toLowerCase().trim() === selectedCategory.toLowerCase().trim()
-      // );
       // Safely extract the category name
       const selectedCategoryName =
         typeof selectedCategory === 'string'
@@ -148,7 +233,6 @@ const ProductTable = () => {
       const category = categories.find(cat =>
         cat.name.toLowerCase().trim() === selectedCategoryName.toLowerCase().trim()
       );
-
 
       if (!category) {
         throw new Error(`Category "${selectedCategory}" not found`);
@@ -185,14 +269,12 @@ const ProductTable = () => {
 
       // Find the subcategory ID
       for (const category of data) {
-        // if (category.name.toLowerCase().trim() === selectedCategory.toLowerCase().trim()) {
         const selectedCategoryName =
           typeof selectedCategory === 'string'
             ? selectedCategory
             : selectedCategory?.name ?? '';
 
         if (category.name.toLowerCase().trim() === selectedCategoryName.toLowerCase().trim()) {
-
           const subcategory = category.subcategories?.find(sub =>
             sub.name.toLowerCase().trim() === selectedSubcategory.toLowerCase().trim()
           );
@@ -223,11 +305,11 @@ const ProductTable = () => {
     }
   };
 
-  // Calculate pagination
-  const totalPages = Math.ceil(products.length / itemsPerPage);
+  // Calculate pagination based on filtered products
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentProducts = products.slice(startIndex, endIndex);
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
   const handleAddToCart = (product) => {
     // TODO: Implement actual cart functionality
@@ -274,7 +356,7 @@ const ProductTable = () => {
   }
 
   // No products found
-  if (!loading && products.length === 0) {
+  if (!loading && filteredProducts.length === 0 && products.length === 0) {
     return (
       <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
         <Paper elevation={0} sx={{ p: 4 }}>
@@ -288,35 +370,45 @@ const ProductTable = () => {
     );
   }
 
+  // No products found after filtering
+  if (!loading && filteredProducts.length === 0 && products.length > 0) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
+        <Paper elevation={0} sx={{ p: 4 }}>
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+            <Typography variant="h6" color="text.secondary">
+              No products match the selected filters. Try adjusting your filters.
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    );
+  }
+
   return (
     <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
       <Paper elevation={0} sx={{ p: 4 }}>
         {/* Header */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <img src={boxes} style={{ width: "30px" }} alt="Products" />
-          {/* {totalPages > 1 && ( 
-            // <CustomPagination 
-            //   count={totalPages}
-            //   page={currentPage}
-            //   onChange={handlePageChange}
-            //   color="primary"
-            //   size="large"
-            // />
-            */}
+          {totalPages > 1 && (
             <CustomPagination
-              count={Math.max(totalPages, 2)} // Force at least 2 pages
+              count={totalPages}
               page={currentPage}
               onChange={handlePageChange}
               color="primary"
               size="large"
             />
-          {/* )} */}
+          )}
         </Box>
 
         {/* Product Count */}
         <Box textAlign="center" mb={4}>
           <Typography variant="body2" color="text.secondary">
-            {startIndex + 1}-{Math.min(endIndex, products.length)} of {products.length} products
+            {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
+            {products.length !== filteredProducts.length && (
+              <span> (filtered from {products.length} total)</span>
+            )}
           </Typography>
         </Box>
 
