@@ -4,12 +4,16 @@ import dropdown from "../assets/drop_down.png";
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useCategory } from "../context/CategoryContext";
+import { useSearch } from "../context/SearchContext";
 import axios from "axios";
 
 const Searchbar = () => {
     const tableRef = useRef(null);
     const { Authorization, isAuthenticated } = useAuth();
     const { selectedCategory, selectedSubcategory, setCategoryOnly, setCategoryAndSubcategory } = useCategory();
+
+    const { searchTerm, setSearchTerm } = useSearch();
+    const [localSearchTerm, setLocalSearchTerm] = useState('');
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [categories, setCategories] = useState([]);
@@ -158,7 +162,7 @@ const Searchbar = () => {
                 category_id: parentCategory.categoryId,
                 name: parentCategory.categoryName
             };
-            
+
             setSelectedCategoryDropdown(categoryObj);
             setCategoryAndSubcategory(categoryObj, subcategory);
             setOpenTable(false);
@@ -173,6 +177,11 @@ const Searchbar = () => {
         return selectedCategory?.name || "All Categories";
     };
 
+    const handleSearch = () => {
+        setSearchTerm(localSearchTerm);
+        setOpenTable(false);
+    };
+
     return (
         <>
             <Box ref={tableRef} display="flex" flexDirection="column" marginTop={2} p={2} borderRadius={2} sx={{ backgroundColor: "#F2F2F2", border: "1px solid #F2F2F2", width: "90%", position: "relative", zIndex: 1000 }}>
@@ -183,7 +192,20 @@ const Searchbar = () => {
                     </Button>
 
                     <Box sx={{ position: 'relative', flexGrow: 1, marginX: "20px" }} >
-                        <TextField size="small" fullWidth placeholder="What are you looking for?" sx={{ marginX: "20px", "& .MuiOutlinedInput-root": { borderRadius: "20px", backgroundColor: "white", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }} />
+                        {/* <TextField size="small" fullWidth placeholder="What are you looking for?" sx={{ marginX: "20px", "& .MuiOutlinedInput-root": { borderRadius: "20px", backgroundColor: "white", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }} /> */}
+                        <TextField
+                            size="small"
+                            fullWidth
+                            placeholder="What are you looking for?"
+                            value={localSearchTerm}
+                            onChange={(e) => setLocalSearchTerm(e.target.value)}
+                            onKeyPress={(e) => {
+                                if(e.key === 'Enter'){
+                                    handleSearch();
+                                }
+                            }}
+                            sx={{ marginX: "20px", "& .MuiOutlinedInput-root": { borderRadius: "20px", backgroundColor: "white", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
+                        />
 
                         {/* Vertical separator line */}
                         <Box sx={{ position: 'absolute', right: '200px', top: '50%', transform: 'translateY(-50%)', width: '1px', height: '60%', backgroundColor: '#ccc' }} />
@@ -217,7 +239,13 @@ const Searchbar = () => {
                         </Menu>
                     </Box>
 
-                    <Button variant="contained" sx={{ width: "12%", marginX: "10px", backgroundColor: "#00B2C9", border: "1px solid #00B2C9", textTransform: "none", borderRadius: "20px" }}>
+                    {/* <Button variant="contained" sx={{ width: "12%", marginX: "10px", backgroundColor: "#00B2C9", border: "1px solid #00B2C9", textTransform: "none", borderRadius: "20px" }}>
+                        Search
+                    </Button> */}
+                    <Button
+                        variant="contained"
+                        onClick={handleSearch}
+                        sx={{ width: "12%", marginX: "10px", backgroundColor: "#00B2C9", border: "1px solid #00B2C9", textTransform: "none", borderRadius: "20px" }}>
                         Search
                     </Button>
                 </Box>

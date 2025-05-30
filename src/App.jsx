@@ -4,6 +4,7 @@ import AppRoutes from './routes/AppRoutes'
 import { AuthProvider } from './context/AuthContext'
 import { CategoryProvider } from './context/CategoryContext'
 import { FilterProvider } from './context/FilterContext'
+import { SearchProvider } from './context/SearchContext'
 
 function App() {
 
@@ -11,9 +12,11 @@ function App() {
     <AuthProvider>
       <CategoryProvider>
         <FilterProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
+          <SearchProvider>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </SearchProvider>
         </FilterProvider>
       </CategoryProvider>
     </AuthProvider>

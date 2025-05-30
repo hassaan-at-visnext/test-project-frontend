@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -16,6 +16,7 @@ import { styled } from '@mui/material/styles';
 import axios from 'axios';
 import { useCategory } from '../../context/CategoryContext';
 import { useAuth } from '../../context/AuthContext';
+import { useSearch } from "../../context/SearchContext";
 import { useFilter } from '../../context/FilterContext';
 import boxes from "../../assets/icons8-boxes-90.png";
 
@@ -88,6 +89,7 @@ const CustomGridItem = styled(Box)({
 });
 
 const ProductTable = ({ onProductClick }) => {
+  const { searchTerm } = useSearch();
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -112,10 +114,14 @@ const ProductTable = ({ onProductClick }) => {
   useEffect(() => {
     applyFilters();
     setCurrentPage(1); // Reset to first page when filters change
-  }, [products, filters]);
+  }, [products, filters, searchTerm]);
 
   const applyFilters = () => {
     let filtered = [...products];
+
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(product => product.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
 
     // Price Filter
     if (filters.minPrice > 0 || filters.maxPrice > 0) {
