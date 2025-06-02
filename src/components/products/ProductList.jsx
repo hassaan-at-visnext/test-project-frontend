@@ -129,7 +129,7 @@ const ProductTable = ({ onProductClick }) => {
         const price = parseFloat(product.price) || 0;
         const minPrice = parseFloat(filters.minPrice) || 0;
         const maxPrice = parseFloat(filters.maxPrice) || Infinity;
-        
+
         if (maxPrice === 0) {
           return price >= minPrice;
         }
@@ -151,12 +151,12 @@ const ProductTable = ({ onProductClick }) => {
       filtered = filtered.filter(product => {
         const productCerts = product.certifications || [];
         // Convert to array if it's a string
-        const certsArray = Array.isArray(productCerts) 
-          ? productCerts 
+        const certsArray = Array.isArray(productCerts)
+          ? productCerts
           : (typeof productCerts === 'string' ? productCerts.split(',').map(c => c.trim()) : []);
-        
-        return filters.selectedCertifications.every(selectedCert => 
-          certsArray.some(productCert => 
+
+        return filters.selectedCertifications.every(selectedCert =>
+          certsArray.some(productCert =>
             productCert.toLowerCase().includes(selectedCert.toLowerCase())
           )
         );
@@ -168,12 +168,12 @@ const ProductTable = ({ onProductClick }) => {
       filtered = filtered.filter(product => {
         const supplierCerts = product.supplier_certifications || [];
         // Convert to array if it's a string
-        const certsArray = Array.isArray(supplierCerts) 
-          ? supplierCerts 
+        const certsArray = Array.isArray(supplierCerts)
+          ? supplierCerts
           : (typeof supplierCerts === 'string' ? supplierCerts.split(',').map(c => c.trim()) : []);
-        
-        return filters.selectedSupplierCertifications.every(selectedCert => 
-          certsArray.some(supplierCert => 
+
+        return filters.selectedSupplierCertifications.every(selectedCert =>
+          certsArray.some(supplierCert =>
             supplierCert.toLowerCase().includes(selectedCert.toLowerCase())
           )
         );
@@ -184,7 +184,7 @@ const ProductTable = ({ onProductClick }) => {
     if (filters.selectedManufacturerLocations && filters.selectedManufacturerLocations.length > 0) {
       filtered = filtered.filter(product => {
         const productLocation = product.manufacturer_location || '';
-        return filters.selectedManufacturerLocations.some(selectedLocation => 
+        return filters.selectedManufacturerLocations.some(selectedLocation =>
           productLocation.toLowerCase().includes(selectedLocation.toLowerCase())
         );
       });
@@ -198,13 +198,47 @@ const ProductTable = ({ onProductClick }) => {
     setFilteredProducts(filtered);
   };
 
+  const isAllCategoriesSelected = () => {
+    if (!selectedCategory) return false;
+
+    // Check if it's the "All Categories" option (category_id is null)
+    if (selectedCategory.category_id === null && selectedCategory.name === "All Categories") {
+      return true;
+    }
+
+    return false;
+  };
+
+  const fetchAllProducts = async () => {
+    try {
+      const productsResponse = await axios.get(`${API_BASE_URL}/products/all`, {
+        headers: { 'Authorization': Authorization }
+      });
+
+      if (productsResponse.data.success) {
+        setProducts(productsResponse.data.data || []);
+      } else {
+        setProducts([]);
+      }
+    } catch (err) {
+      throw err;
+    }
+  };
+
   const fetchProducts = async () => {
     setLoading(true);
     setError(null);
     setCurrentPage(1);
 
     try {
-      if (selectedSubcategory) {
+      // if (selectedSubcategory) {
+      //   await fetchProductsBySubcategory();
+      // } else {
+      //   await fetchProductsByCategory();
+      // }
+      if (isAllCategoriesSelected()) {
+        await fetchAllProducts();
+      } else if (selectedSubcategory) {
         await fetchProductsBySubcategory();
       } else {
         await fetchProductsByCategory();
@@ -403,106 +437,106 @@ const ProductTable = ({ onProductClick }) => {
   return (
     <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
       {/* <Paper elevation={0} sx={{ p: 4 }}> */}
-        {/* Header */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <img src={boxes} style={{ width: "30px" }} alt="Products" />
-          {/* {totalPages > 1 && ( */}
-            <CustomPagination
-              count={totalPages}
-              page={currentPage}
-              onChange={handlePageChange}
-              color="primary"
-              size="large"
-            />
-          {/* )} */}
-        </Box>
+      {/* Header */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <img src={boxes} style={{ width: "30px" }} alt="Products" />
+        {/* {totalPages > 1 && ( */}
+        <CustomPagination
+          count={totalPages}
+          page={currentPage}
+          onChange={handlePageChange}
+          color="primary"
+          size="large"
+        />
+        {/* )} */}
+      </Box>
 
-        {/* Product Count */}
-        <Box textAlign="center" mb={4}>
-          <Typography variant="body2" color="text.secondary">
-            {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
-            {products.length !== filteredProducts.length && (
-              <span> (filtered from {products.length} total)</span>
-            )}
-          </Typography>
-        </Box>
+      {/* Product Count */}
+      <Box textAlign="center" mb={4}>
+        <Typography variant="body2" color="text.secondary">
+          {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
+          {products.length !== filteredProducts.length && (
+            <span> (filtered from {products.length} total)</span>
+          )}
+        </Typography>
+      </Box>
 
-        {/* Product Grid */}
-        <Box display="flex" flexWrap="wrap" mb={4}>
-          {currentProducts.map((product) => (
-            <CustomGridItem key={product.product_id}>
-              <StyledCard onClick={() => handleCardClick(product.product_id)}>
-                <Box position="relative">
-                  <ProductImage
-                    className="product-image"
-                    component="img"
-                    image={product.image || 'https://via.placeholder.com/300x220?text=Product+Image'}
-                    alt={product.name}
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/300x220?text=Product+Image';
+      {/* Product Grid */}
+      <Box display="flex" flexWrap="wrap" mb={4}>
+        {currentProducts.map((product) => (
+          <CustomGridItem key={product.product_id}>
+            <StyledCard onClick={() => handleCardClick(product.product_id)}>
+              <Box position="relative">
+                <ProductImage
+                  className="product-image"
+                  component="img"
+                  image={product.image || 'https://via.placeholder.com/300x220?text=Product+Image'}
+                  alt={product.name}
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/300x220?text=Product+Image';
+                  }}
+                />
+              </Box>
+
+              <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                <Box mb={1}>
+                  <Chip
+                    label={product.stock_availability_in_us ? 'In Stock' : 'Stock in USA'}
+                    size="small"
+                    sx={{
+                      backgroundColor: 'transparent',
+                      color: 'black',
+                      fontWeight: 500,
+                      border: 'none',
+                      pl: 0
                     }}
                   />
                 </Box>
 
-                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Box mb={1}>
-                    <Chip
-                      label={product.stock_availability_in_us ? 'In Stock' : 'Stock in USA'}
-                      size="small"
-                      sx={{
-                        backgroundColor: 'transparent',
-                        color: 'black',
-                        fontWeight: 500,
-                        border: 'none',
-                        pl: 0
-                      }}
-                    />
-                  </Box>
+                <Typography variant="h6" component="h3" fontWeight="600" mb={2} sx={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden'
+                }}>
+                  {product.name}
+                </Typography>
 
-                  <Typography variant="h6" component="h3" fontWeight="600" mb={2} sx={{
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden'
-                  }}>
-                    {product.name}
+                <Box flexGrow={1}>
+                  <Typography variant="h6" component="p" fontWeight="bold" color="black" mb={1}>
+                    ${product.price}/Piece
                   </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    MOQ: {product.moq?.toLocaleString() || 'N/A'} units
+                  </Typography>
+                </Box>
 
-                  <Box flexGrow={1}>
-                    <Typography variant="h6" component="p" fontWeight="bold" color="black" mb={1}>
-                      ${product.price}/Piece
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      MOQ: {product.moq?.toLocaleString() || 'N/A'} units
-                    </Typography>
-                  </Box>
+                <AddToCartButton
+                  className="add-to-cart-btn"
+                  variant="contained"
+                  onClick={(e) => handleAddToCart(e, product)}
+                  size="large"
+                >
+                  Add to Cart
+                </AddToCartButton>
+              </CardContent>
+            </StyledCard>
+          </CustomGridItem>
+        ))}
+      </Box>
 
-                  <AddToCartButton
-                    className="add-to-cart-btn"
-                    variant="contained"
-                    onClick={(e) => handleAddToCart(e, product)}
-                    size="large"
-                  >
-                    Add to Cart
-                  </AddToCartButton>
-                </CardContent>
-              </StyledCard>
-            </CustomGridItem>
-          ))}
+      {/* Bottom Pagination */}
+      {totalPages > 1 && (
+        <Box display="flex" justifyContent="center" mt={4}>
+          <CustomPagination
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+            size="large"
+          />
         </Box>
-
-        {/* Bottom Pagination */}
-        {totalPages > 1 && (
-          <Box display="flex" justifyContent="center" mt={4}>
-            <CustomPagination
-              count={totalPages}
-              page={currentPage}
-              onChange={handlePageChange}
-              color="primary"
-              size="large"
-            />
-          </Box>
-        )}
+      )}
       {/* </Paper> */}
     </Container>
   );
