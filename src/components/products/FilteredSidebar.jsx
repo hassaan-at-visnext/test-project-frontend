@@ -81,10 +81,10 @@ const FilteredSidebar = () => {
 
     const handleCertCheckboxChange = (event) => {
         const { name, checked } = event.target;
-        const newCertifications = checked 
-            ? [...filters.selectedCertifications, name] 
+        const newCertifications = checked
+            ? [...filters.selectedCertifications, name]
             : filters.selectedCertifications.filter((cert) => cert !== name);
-        
+
         updateFilters({ selectedCertifications: newCertifications });
     };
 
@@ -104,10 +104,10 @@ const FilteredSidebar = () => {
 
     const handleLocationCheckboxChange = (event) => {
         const { name, checked } = event.target;
-        const newLocations = checked 
-            ? [...filters.selectedManufacturerLocations, name] 
+        const newLocations = checked
+            ? [...filters.selectedManufacturerLocations, name]
             : filters.selectedManufacturerLocations.filter(item => item !== name);
-        
+
         updateFilters({ selectedManufacturerLocations: newLocations });
     };
 
@@ -128,10 +128,10 @@ const FilteredSidebar = () => {
     // Handle supplier certifications
     const handleSupplierCertChange = (event) => {
         const { name, checked } = event.target;
-        const newSupplierCerts = checked 
-            ? [...filters.selectedSupplierCertifications, name] 
+        const newSupplierCerts = checked
+            ? [...filters.selectedSupplierCertifications, name]
             : filters.selectedSupplierCertifications.filter((item) => item !== name);
-        
+
         updateFilters({ selectedSupplierCertifications: newSupplierCerts });
     };
 
@@ -329,26 +329,30 @@ const FilteredSidebar = () => {
     return (
         <>
             {/* More Categories Search Bar */}
-            <TextField
-                size="small"
-                fullWidth
-                placeholder="More Categories"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: "20px", backgroundColor: "#F2F2F2", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
-                InputProps={{
-                    endAdornment: (
-                        <InputAdornment position="end">
-                            <SearchIcon color="action" />
-                        </InputAdornment>
-                    )
-                }}
-                inputProps={{
-                    style: { textAlign: "center" }
-                }}
-            />
-            {/* Categories Content */}
-            {renderCategoriesContent()}
+            {selectedCategory && selectedCategory.category_id !== null && (
+                <>
+                    <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="More Categories"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        sx={{ "& .MuiOutlinedInput-root": { borderRadius: "20px", backgroundColor: "#F2F2F2", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <SearchIcon color="action" />
+                                </InputAdornment>
+                            )
+                        }}
+                        inputProps={{
+                            style: { textAlign: "center" }
+                        }}
+                    />
+                    {/* Categories Content */}
+                    {renderCategoriesContent()}
+                </>
+            )}
 
             {/* PriceFilter Starts*/}
             <Box mt={3}>
@@ -356,10 +360,10 @@ const FilteredSidebar = () => {
                     Price
                 </Typography>
                 <Box display="flex" alignItems="center" gap={1}>
-                    <TextField 
-                        value={filters.minPrice} 
-                        onChange={handleMinPriceChange} 
-                        placeholder="from" 
+                    <TextField
+                        value={filters.minPrice}
+                        onChange={handleMinPriceChange}
+                        placeholder="from"
                         size="small"
                         sx={{ width: "45%", borderRadius: "50px", backgroundColor: "#F2F2F2", '& .MuiOutlinedInput-root': { borderRadius: "20px", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
                         inputProps={{ inputMode: 'numeric', pattern: '\\d*' }}
@@ -367,10 +371,10 @@ const FilteredSidebar = () => {
 
                     <Typography variant="body1">-</Typography>
 
-                    <TextField 
-                        value={filters.maxPrice} 
-                        onChange={handleMaxPriceChange} 
-                        placeholder="to" 
+                    <TextField
+                        value={filters.maxPrice}
+                        onChange={handleMaxPriceChange}
+                        placeholder="to"
                         size="small"
                         sx={{ width: "45%", borderRadius: "50px", backgroundColor: "#F2F2F2", '& .MuiOutlinedInput-root': { borderRadius: "50px", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
                         inputProps={{ inputMode: 'numeric', pattern: '\\d*' }}
@@ -385,13 +389,13 @@ const FilteredSidebar = () => {
                 <Typography gutterBottom>
                     MOQ
                 </Typography>
-                <TextField 
-                    value={filters.moq} 
-                    onChange={handleMoqChange} 
-                    size="small" 
+                <TextField
+                    value={filters.moq}
+                    onChange={handleMoqChange}
+                    size="small"
                     placeholder="less than"
-                    sx={{ width: '100%', borderRadius: "50px", backgroundColor: "#F2F2F2", '& .MuiOutlinedInput-root': { borderRadius: "50px", backgroundColor: "#F2F2F2", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }} 
-                    inputProps={{ style: { textAlign: 'center' }, inputMode: 'numeric', pattern: '\\d*' }} 
+                    sx={{ width: '100%', borderRadius: "50px", backgroundColor: "#F2F2F2", '& .MuiOutlinedInput-root': { borderRadius: "50px", backgroundColor: "#F2F2F2", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
+                    inputProps={{ style: { textAlign: 'center' }, inputMode: 'numeric', pattern: '\\d*' }}
                 />
             </Box>
             {/* MOQ Filter Ends */}
@@ -399,11 +403,11 @@ const FilteredSidebar = () => {
             {/* Product Certification start */}
             <Box mt={3}>
                 <Typography gutterBottom>Product Certification</Typography>
-                <TextField 
-                    size="small" 
-                    fullWidth 
-                    placeholder="Product Certifications..." 
-                    value={searchCerts} 
+                <TextField
+                    size="small"
+                    fullWidth
+                    placeholder="Product Certifications..."
+                    value={searchCerts}
                     onChange={handleSearchCertsChange}
                     sx={{ "& .MuiOutlinedInput-root": { borderRadius: "20px", backgroundColor: "#F2F2F2", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
                     InputProps={{
@@ -443,11 +447,11 @@ const FilteredSidebar = () => {
             {/* Supplier Certifications Start */}
             <Box mt={3}>
                 <Typography gutterBottom>Supplier Certification</Typography>
-                <TextField 
-                    size="small" 
-                    fullWidth 
-                    placeholder="Supplier Certifications..." 
-                    value={searchSupplierCerts} 
+                <TextField
+                    size="small"
+                    fullWidth
+                    placeholder="Supplier Certifications..."
+                    value={searchSupplierCerts}
                     onChange={(e) => setSearchSupplierCerts(e.target.value)}
                     sx={{ "& .MuiOutlinedInput-root": { borderRadius: "20px", backgroundColor: "#F2F2F2", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
                     InputProps={{
@@ -464,8 +468,8 @@ const FilteredSidebar = () => {
                 <FormGroup sx={{ mt: 2 }}>
                     {supplierCertificaitons.filter(cert => cert.toLowerCase().includes(searchSupplierCerts.toLowerCase())).map(cert => (
                         <FormControlLabel key={cert} control={
-                            <Checkbox 
-                                name={cert} 
+                            <Checkbox
+                                name={cert}
                                 checked={filters.selectedSupplierCertifications.includes(cert)}
                                 onChange={handleSupplierCertChange}
                             />
