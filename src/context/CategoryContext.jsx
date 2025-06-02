@@ -3,7 +3,8 @@ import { createContext, useContext, useState } from "react";
 const CategoryContext = createContext();
 
 export const CategoryProvider = ({ children }) => {
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    // const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState({ category_id: null, name: "All Categories" });
     const [selectedSubcategory, setSelectedSubcategory] = useState(null);
 
     const setCategoryOnly = (category) => {
