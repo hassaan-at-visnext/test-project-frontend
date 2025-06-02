@@ -208,7 +208,7 @@ const Searchbar = () => {
                         />
 
                         {/* Vertical separator line */}
-                        <Box sx={{ position: 'absolute', right: '200px', top: '50%', transform: 'translateY(-50%)', width: '1px', height: '60%', backgroundColor: '#ccc' }} />
+                        <Box sx={{ position: 'absolute', right: '220px', top: '50%', transform: 'translateY(-50%)', width: '1px', height: '60%', backgroundColor: '#ccc' }} />
 
                         {/* Categories dropdown button */}
                         <Button color="inherit" sx={{ position: 'absolute', right: "8px", top: "50%", transform: "translateY(-50%)", textTransform: 'none', fontSize: "0.9rem", minWidth: '130px', height: "32px", padding: "4px 8px", display: "flex", alignItems: 'center', gap: '8px' }}
