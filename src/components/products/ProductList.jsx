@@ -149,7 +149,7 @@ const ProductTable = ({ onProductClick }) => {
     // Product Certifications Filter (AND condition - all selected must be present)
     if (filters.selectedCertifications && filters.selectedCertifications.length > 0) {
       filtered = filtered.filter(product => {
-        const productCerts = product.certifications || [];
+        const productCerts = product.product_certifications || [];
         // Convert to array if it's a string
         const certsArray = Array.isArray(productCerts)
           ? productCerts
@@ -158,6 +158,7 @@ const ProductTable = ({ onProductClick }) => {
         return filters.selectedCertifications.every(selectedCert =>
           certsArray.some(productCert =>
             productCert.toLowerCase().includes(selectedCert.toLowerCase())
+            // productCert.trim().toLowerCase() === selectedCert.trim().toLowerCase()
           )
         );
       });
