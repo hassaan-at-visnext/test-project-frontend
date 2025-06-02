@@ -29,7 +29,7 @@ const Navbar = () => {
                         <Button sx={{ textTransform: 'none' }} color="inherit" endIcon={<ArrowDropDownIcon />}>
                             About Us
                         </Button>
-                        <Box className="dropdown" sx={{ display: "none", position: "absolute", top: "100%", left: 0, bgcolor: "background.paper", border: "1px solid lightgrey", zIndex: 10, minWidth: 150, borderRadius: 1 }}>
+                        <Box className="dropdown" sx={{ display: "none", position: "absolute", zIndex: 1100, top: "100%", left: 0, bgcolor: "background.paper", border: "1px solid lightgrey", minWidth: 150, borderRadius: 1 }}>
                             <Box sx={{ padding: "0.5rem 1rem", cursor: "pointer", "&:hover": { bgcolor: "grey.100" } }}>
                                 <Typography variant="body2">Our Story</Typography>
                             </Box>
