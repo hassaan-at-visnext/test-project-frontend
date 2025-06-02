@@ -247,8 +247,8 @@ const ProductTable = ({ onProductClick }) => {
     } catch (err) {
       console.error('Error fetching products:', err);
       setError(err.response?.data?.message || 'Failed to fetch products');
-      setProducts([]);
-      setFilteredProducts([]);
+      // setProducts([]);
+      // setFilteredProducts([]);
     } finally {
       setLoading(false);
     }
@@ -296,59 +296,144 @@ const ProductTable = ({ onProductClick }) => {
     }
   };
 
-  const fetchProductsBySubcategory = async () => {
-    try {
-      // Get categories with subcategories
-      const categoriesSubcategoriesResponse = await axios.get(`${API_BASE_URL}/categories-subcategories`, {
-        headers: { 'Authorization': Authorization }
-      });
+  // const fetchProductsBySubcategory = async () => {
+  //   try {
+  //     // Get subcategory ID from context
+  //     const subcategoryId = selectedSubcategory?.subcategory_id;
 
-      if (!categoriesSubcategoriesResponse.data.success) {
-        throw new Error('Failed to fetch categories and subcategories');
-      }
+  //     console.log("===============================");
+  //     console.log("========subcategoryID:=========");
+  //     console.log("subcategoryId: ", subcategoryId);
+  //     console.log("===============================");
+  //     console.log("\n");
 
-      const data = categoriesSubcategoriesResponse.data.data;
-      let subcategoryId = null;
 
-      // Find the subcategory ID
-      for (const category of data) {
-        const selectedCategoryName =
-          typeof selectedCategory === 'string'
-            ? selectedCategory
-            : selectedCategory?.name ?? '';
+  //     if (!subcategoryId) {
+  //       throw new Error('No subcategory selected or subcategory ID not found');
+  //     }
 
-        if (category.name.toLowerCase().trim() === selectedCategoryName.toLowerCase().trim()) {
-          const subcategory = category.subcategories?.find(sub =>
-            sub.name.toLowerCase().trim() === selectedSubcategory.toLowerCase().trim()
-          );
+  //     // Fetch child subcategories using the subcategory ID as parent_id
+  //     const childSubcategoriesResponse = await axios.get(`${API_BASE_URL}/subcategories/${subcategoryId}`, {
+  //       headers: { 'Authorization': Authorization }
+  //     });
 
-          if (subcategory) {
-            subcategoryId = subcategory.subcategory_id;
-            break;
-          }
-        }
-      }
+  //     console.log("===============================");
+  //     console.log("==childSubcategoriesResponse:==");
+  //     console.log("childSubcategoriesResponse: ", childSubcategoriesResponse);
+  //     console.log("===============================");
+  //     console.log("\n");
 
-      if (!subcategoryId) {
-        throw new Error(`Subcategory "${selectedSubcategory}" not found in category "${selectedCategory}"`);
-      }
 
-      // Fetch products by subcategory ID
-      const productsResponse = await axios.get(`${API_BASE_URL}/products/subcategory/${subcategoryId}`, {
-        headers: { 'Authorization': Authorization }
-      });
+  //     if (!childSubcategoriesResponse.data.success) {
+  //       throw new Error('Failed to fetch child subcategories');
+  //     }
 
-      if (productsResponse.data.success) {
-        setProducts(productsResponse.data.data || []);
-      } else {
-        setProducts([]);
-      }
-    } catch (err) {
-      throw err;
-    }
-  };
+  //     const childSubcategories = childSubcategoriesResponse.data.data || [];
+
+  //     console.log("===============================");
+  //     console.log("====childSubcategories: =====");
+  //     console.log("childSubcategories: ", childSubcategories);
+  //     console.log("===============================");
+  //     console.log("\n");
+
+
+  //     if (childSubcategories.length === 0) {
+  //       setProducts([]);
+  //       return;
+  //     }
+
+  //     // Array to store all products from all child subcategories
+  //     let allProducts = [];
+
+  //     // Fetch products for each child subcategory
+  //     for (const childSubcategory of childSubcategories) {
+  //       const productsResponse = await axios.get(`${API_BASE_URL}/products/subcategory/${childSubcategory.subcategory_id}`, {
+  //         headers: { 'Authorization': Authorization }
+  //       });
+
+  //       if (productsResponse.data.success && productsResponse.data.data) {
+  //         // Add products from this subcategory to the allProducts array
+  //         allProducts = [...allProducts, ...productsResponse.data.data];
+  //       }
+  //     }
+
+  //     // Set all collected products to state
+  //     setProducts(allProducts);
+
+  //     console.log("===============================");
+  //     console.log("==========Products: ============");
+  //     console.log("Products: ", products)
+  //     console.log("===============================");
+  //     console.log("\n");
+
+
+  //   } catch (err) {
+  //     console.error('Error fetching products by subcategory:', err);
+  //     setProducts([]);
+  //     throw err;
+  //   }
+  // };
 
   // Calculate pagination based on filtered products
+  const fetchProductsBySubcategory = async () => {
+  try {
+    // Get subcategory ID from context
+    const subcategoryId = selectedSubcategory?.subcategory_id;
+
+    if (!subcategoryId) {
+      throw new Error('No subcategory selected or subcategory ID not found');
+    }
+
+    // Fetch child subcategories using the subcategory ID as parent_id
+    const childSubcategoriesResponse = await axios.get(`${API_BASE_URL}/subcategories/${subcategoryId}`, {
+      headers: { 'Authorization': Authorization }
+    });
+
+    if (!childSubcategoriesResponse.data.success) {
+      throw new Error('Failed to fetch child subcategories');
+    }
+
+    const childSubcategories = childSubcategoriesResponse.data.data || [];
+
+    if (childSubcategories.length === 0) {
+      console.log("No child subcategories found, setting products to empty array");
+      setProducts([]);
+      return;
+    }
+
+    // Array to store all products from all child subcategories
+    let allProducts = [];
+
+    // Fetch products for each child subcategory
+    for (const childSubcategory of childSubcategories) {
+      try {
+        const productsResponse = await axios.get(`${API_BASE_URL}/products/subcategory/${childSubcategory.subcategory_id}`, {
+          headers: { 'Authorization': Authorization }
+        });
+
+        console.log(`Products response for subcategory ${childSubcategory.subcategory_id}:`, productsResponse.data);
+
+        if (productsResponse.data.success && productsResponse.data.data) {
+          // Add products from this subcategory to the allProducts array
+          allProducts = [...allProducts, ...productsResponse.data.data];
+          console.log(`Added ${productsResponse.data.data.length} products from subcategory ${childSubcategory.subcategory_id}`);
+        }
+      } catch (subError) {
+        console.error(`Error fetching products for subcategory ${childSubcategory.subcategory_id}:`, subError);
+        // Continue with other subcategories even if one fails
+      }
+    }
+
+    // Set all collected products to state
+    setProducts(allProducts);
+
+  } catch (err) {
+    console.error('Error fetching products by subcategory:', err);
+    setProducts([]);
+    throw err;
+  }
+};
+  
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -407,6 +492,17 @@ const ProductTable = ({ onProductClick }) => {
 
   // No products found
   if (!loading && filteredProducts.length === 0 && products.length === 0) {
+
+    console.log("filteredProducts.length: ", filteredProducts.length);
+    console.log(filteredProducts);    
+    console.log("typeof filteredProducts.length: ", typeof filteredProducts);
+    
+    console.log("products.length: ", products.length);
+    console.log(products);
+    console.log("typeof products.length: ", typeof products);
+    
+    
+    
     return (
       <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
         <Paper elevation={0} sx={{ p: 4 }}>
