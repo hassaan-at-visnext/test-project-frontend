@@ -25,24 +25,26 @@ const StyledCard = styled(Card)(({ theme }) => ({
   height: '100%',
   display: 'flex',
   flexDirection: 'column',
-  transition: 'all 0.3s ease-in-out',
+  // transition: 'all 0.3s ease-in-out',
   position: 'relative',
   cursor: 'pointer',
+  boxShadow: 'none',
+  border: 'none',
   '&:hover': {
-    transform: 'translateY(-4px)',
+    // transform: 'translateY(-4px)',
     boxShadow: theme.shadows[8],
-    '& .product-image': {
-      transform: 'scale(1.05)',
-    },
+    // '& .product-image': {
+    //   transform: 'scale(1.05)',
+    // },
     '& .add-to-cart-btn': {
       opacity: 1,
-      transform: 'translateY(0)',
+      // transform: 'translateY(0)',
     }
   }
 }));
 
 const ProductImage = styled(CardMedia)({
-  transition: 'transform 0.3s ease-in-out',
+  // transition: 'transform 0.3s ease-in-out',
   width: '80%',
   height: '220px',
   objectFit: 'cover',
@@ -55,14 +57,14 @@ const AddToCartButton = styled(Button)({
   '&:hover': {
     backgroundColor: '#009BB0',
   },
-  borderRadius: '25px',
+  borderRadius: '5px',
   textTransform: 'none',
   fontWeight: 600,
   width: '100%',
   marginTop: '12px',
   opacity: 0,
   transform: 'translateY(10px)',
-  transition: 'all 0.3s ease-in-out',
+  transition: 'all 0.1s ease-in-out',
 });
 
 const CustomPagination = styled(Pagination)({
@@ -574,6 +576,7 @@ const ProductTable = ({ onProductClick }) => {
                   onError={(e) => {
                     e.target.src = 'https://via.placeholder.com/300x220?text=Product+Image';
                   }}
+                  style={{ margin: "12px auto 0 auto" }}    
                 />
               </Box>
 
@@ -614,7 +617,7 @@ const ProductTable = ({ onProductClick }) => {
                   className="add-to-cart-btn"
                   variant="contained"
                   onClick={(e) => handleAddToCart(e, product)}
-                  size="large"
+                  // size="large"
                 >
                   Add to Cart
                 </AddToCartButton>
