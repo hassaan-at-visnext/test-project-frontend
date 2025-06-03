@@ -244,11 +244,13 @@ const FilteredSidebar = () => {
                 </List>
 
                 {filteredSubcategories.length > 6 && (
-                    <Box textAlign="center" mt={1}>
+                    <Box
+                        // textAlign="center"
+                        mt={1}>
                         <Typography
                             variant="body2"
                             color="primary"
-                            sx={{ cursor: 'pointer', textDecoration: 'underline' }}
+                            sx={{ color: "#29B574", cursor: 'pointer', textDecoration: 'underline' }}
                             onClick={() => setShowAll(!showAll)}
                         >
                             {showAll ? 'Show Less' : 'Show All'}
@@ -437,54 +439,13 @@ const FilteredSidebar = () => {
                 </FormGroup>
 
                 {filteredCerts.length > 6 && (
-                    <Typography variant="body2" onClick={() => setShowAllCerts((prev) => !prev)} sx={{ mt: 1, color: "primary.main", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>
+                    <Typography variant="body2" style={{ color: "#29B574" }} onClick={() => setShowAllCerts((prev) => !prev)} sx={{ mt: 1, color: "primary.main", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>
                         {showAllCerts ? "Show Less" : `Show All (${filteredCerts.length})`}
                     </Typography>
                 )}
             </Box>
-{/* Product Certification ends */}
-            {/* <Box mt={3}>
-                <Typography gutterBottom>Product Certification</Typography>
-                <TextField
-                    size="small"
-                    fullWidth
-                    placeholder="Product Certifications..."
-                    value={searchCerts}
-                    onChange={handleSearchCertsChange}
-                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: "20px", backgroundColor: "#F2F2F2", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <SearchIcon color="action" />
-                            </InputAdornment>
-                        )
-                    }}
-                    inputProps={{
-                        style: { textAlign: "center" }
-                    }}
-                />
-                <FormGroup sx={{ mt: 2 }}>
-                    {displayedCerts.filter((cert) => cert.toLowerCase().includes(searchCerts.toLowerCase())).map((cert) => (
-                        <FormControlLabel key={cert} control={
-                            <Checkbox
-                                name={cert}
-                                checked={filters.selectedCertifications.includes(cert)}
-                                onChange={handleCertCheckboxChange}
-                            />
-                        }
-                            label={cert}
-                            sx={{ "& .MuiFormControlLabel-label": { fontSize: "0.8rem" }, marginBottom: "0px" }}
-                        />
-                    ))}
-                </FormGroup>
-
-                {filteredCerts.length > 6 && (
-                    <Typography variant="body2" onClick={() => setShowAllCerts((prev) => !prev)} sx={{ mt: 1, color: "primary.main", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>
-                        {showAllCerts ? "Show Less" : `Show All (${filteredCerts.length})`}
-                    </Typography>
-                )}
-            </Box> */}
             {/* Product Certification ends */}
+
 
             {/* Supplier Certifications Start */}
             <Box mt={3}>
@@ -567,12 +528,13 @@ const FilteredSidebar = () => {
                         variant="body2"
                         onClick={() => setShowAllLocations((prev) => !prev)}
                         sx={{
-                            mt: 1,
+                            // mt: 1,
                             color: "primary.main",
                             cursor: "pointer",
                             fontWeight: 500,
                             fontSize: "0.85rem"
                         }}
+                        style={{ color: "#29B574" }}
                     >
                         {showAllLocations ? "Show Less" : `Show All (${filteredLocations.length})`}
                     </Typography>
