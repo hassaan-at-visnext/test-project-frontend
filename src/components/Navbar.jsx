@@ -1,6 +1,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import logo from "../assets/bh-logo-blue-n.png";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import dropdown from "../assets/drop_down.png";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -26,8 +27,11 @@ const Navbar = () => {
 
                     {/* Dropdown for About Us */}
                     <Box sx={{ position: "relative", "&:hover .dropdown": { display: "block" } }}>
-                        <Button sx={{ textTransform: 'none' }} color="inherit" endIcon={<ArrowDropDownIcon />}>
+                        <Button sx={{ textTransform: 'none' }} color="inherit" 
+                        // endIcon={<ArrowDropDownIcon />}
+                        >
                             About Us
+                            <img src={dropdown} alt="dropdown icon" style={{ width: "15px", marginLeft: "10px", flexShrink: "0"}}/>
                         </Button>
                         <Box className="dropdown" sx={{ display: "none", position: "absolute", zIndex: 1100, top: "100%", left: 0, bgcolor: "background.paper", border: "1px solid lightgrey", minWidth: 150, borderRadius: 1 }}>
                             <Box sx={{ padding: "0.5rem 1rem", cursor: "pointer", "&:hover": { bgcolor: "grey.100" } }}>

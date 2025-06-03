@@ -152,29 +152,6 @@ const Searchbar = () => {
         }
     };
 
-    // const handleSubcategoryClick = (subcategory) => {
-    //     const parentCategory = columns.find(col =>
-    //         col.subcategories.some(sub => sub.subcategoryName === subcategory.subcategoryName)
-    //     );
-
-    //     if (parentCategory) {
-    //         const categoryObj = {
-    //             category_id: parentCategory.categoryId,
-    //             name: parentCategory.categoryName
-    //         };
-
-    //         setSelectedCategoryDropdown(categoryObj);
-    //         setCategoryAndSubcategory(categoryObj, subcategory);
-    //         setOpenTable(false);
-    //     }
-
-    //     console.log("category: ", selectedCategory);
-    //     console.log("subcategory: ", selectedSubcategory);
-
-    // };
-
-    // In Searchbar.jsx, replace the handleSubcategoryClick function with this:
-
     const handleSubcategoryClick = (subcategory) => {
         const parentCategory = columns.find(col =>
             col.subcategories.some(sub => sub.subcategoryName === subcategory.subcategoryName)
@@ -186,10 +163,8 @@ const Searchbar = () => {
                 name: parentCategory.categoryName
             };
 
-            // Create the subcategory object with the correct structure
-            // Make sure to use subcategory_id (with underscore) to match what ProductList expects
             const subcategoryObj = {
-                subcategory_id: subcategory.subcategoryId,  // This is the key fix - use subcategory_id
+                subcategory_id: subcategory.subcategoryId,  
                 subcategoryName: subcategory.subcategoryName
             };
 
@@ -197,9 +172,6 @@ const Searchbar = () => {
             setCategoryAndSubcategory(categoryObj, subcategoryObj);
             setOpenTable(false);
 
-            // Log the values that were just set (not the state, which updates asynchronously)
-            console.log("Selected category: ", categoryObj);
-            console.log("Selected subcategory: ", subcategoryObj);
         }
     };
 
