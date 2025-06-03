@@ -19,6 +19,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useSearch } from "../../context/SearchContext";
 import { useFilter } from '../../context/FilterContext';
 import boxes from "../../assets/icons8-boxes-90.png";
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   height: '100%',
@@ -536,7 +537,8 @@ const ProductTable = ({ onProductClick }) => {
       {/* <Paper elevation={0} sx={{ p: 4 }}> */}
       {/* Header */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <img src={boxes} style={{ width: "30px" }} alt="Products" />
+        {/* <img src={boxes} style={{ width: "30px" }} alt="Products" /> */}
+        <ViewModuleIcon style={{ fontSize: 35 }}/>
         {/* {totalPages > 1 && ( */}
         <CustomPagination
           count={totalPages}
