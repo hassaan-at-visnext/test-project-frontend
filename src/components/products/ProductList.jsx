@@ -235,11 +235,6 @@ const ProductTable = ({ onProductClick }) => {
     setCurrentPage(1);
 
     try {
-      // if (selectedSubcategory) {
-      //   await fetchProductsBySubcategory();
-      // } else {
-      //   await fetchProductsByCategory();
-      // }
       if (isAllCategoriesSelected()) {
         await fetchAllProducts();
       } else if (selectedSubcategory) {

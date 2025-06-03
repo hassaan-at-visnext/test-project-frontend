@@ -245,9 +245,6 @@ const Searchbar = () => {
                         </Menu>
                     </Box>
 
-                    {/* <Button variant="contained" sx={{ width: "12%", marginX: "10px", backgroundColor: "#00B2C9", border: "1px solid #00B2C9", textTransform: "none", borderRadius: "20px" }}>
-                        Search
-                    </Button> */}
                     <Button
                         variant="contained"
                         onClick={handleSearch}
@@ -272,7 +269,7 @@ const Searchbar = () => {
                                                     fontSize: "0.8rem",
                                                     borderBottom: "none",
                                                     cursor: "pointer",
-                                                    '&:hover': { backgroundColor: "rgba(0,0,0,0.04)" }
+                                                    '&:hover': { color: "#29B574" }
                                                 }}
                                             >
                                                 {col.categoryName}
@@ -294,7 +291,7 @@ const Searchbar = () => {
                                                             paddingY: "0.125rem",
                                                             borderBottom: "none",
                                                             cursor: sub ? "pointer" : "default",
-                                                            '&:hover': sub ? { backgroundColor: "rgba(0,0,0,0.04)" } : {}
+                                                            '&:hover': sub ? { color: "#29B574" } : {}
                                                         }}
                                                     >
                                                         {sub ? sub.subcategoryName : ""}
