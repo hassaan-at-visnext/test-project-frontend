@@ -190,7 +190,7 @@ const Searchbar = () => {
 
     return (
         <>
-            <Box ref={tableRef} display="flex" flexDirection="column" marginTop={2} p={2} borderRadius={2} sx={{ backgroundColor: "#F2F2F2", border: "1px solid #F2F2F2", width: "90%", position: "relative", zIndex: 1000 }}>
+            <Box ref={tableRef} display="flex" flexDirection="column" marginTop={2} p={2} borderRadius={2} sx={{ backgroundColor: "#F2F2F2", border: "1px solid #F2F2F2", width: "73%", position: "relative", zIndex: 1000 }}>
                 <Box display="flex" >
                     <Button color="inherit" onClick={() => setOpenTable(!openTable)} sx={{ backgroundColor: openTable ? '#ffffff' : 'transparent', marginX: "15px", textTransform: 'none', borderRadius: "20px", fontSize: "1.1rem" }}>
                         <img src={boxes} alt="icon" style={{ width: "20px", marginRight: "5px" }} />

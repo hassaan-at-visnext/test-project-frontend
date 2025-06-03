@@ -14,7 +14,7 @@ const Navbar = () => {
     }  
 
     return (
-        <Box component="nav" display="flex" alignItems="center" padding="1rem" sx={{ width: "92%" }}>
+        <Box component="nav" display="flex" alignItems="center" padding="1rem" sx={{ width: "73%" }}>
             <Box display="flex" alignItems="center" flexGrow={1} >
                 <Box component="img" src={logo} alt="Logo" sx={{ height: 55, marginRight: 4, marginTop: 2 }} />
 
