@@ -225,10 +225,7 @@ const FilteredSidebar = () => {
                         <ListItem
                             key={subcategory.subcategory_id}
                             sx={{
-                                cursor: 'pointer',
-                                '&:hover': {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
-                                }
+                                cursor: 'pointer'
                             }}
                             onClick={() => handleSubcategoryClick(subcategory)}
                         >
@@ -315,8 +312,8 @@ const FilteredSidebar = () => {
         return (
             <Box>
                 {selectedCategory && (
-                    <Box mb={2}>
-                        <Typography variant="subtitle1" color="success.main" fontWeight="bold">
+                    <Box mb={0}>
+                        <Typography variant="subtitle2" color="success.main" >
                             {selectedCategory.name}
                         </Typography>
                     </Box>
