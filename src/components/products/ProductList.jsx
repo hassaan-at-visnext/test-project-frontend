@@ -77,6 +77,7 @@ const CustomPagination = styled(Pagination)({
       }
     }
   }
+  
 });
 
 const CustomGridItem = styled(Box)({
@@ -100,12 +101,16 @@ const ProductTable = ({ onProductClick }) => {
   const [error, setError] = useState(null);
   const itemsPerPage = 12;
 
-  const { selectedCategory, selectedSubcategory } = useCategory();
+  const { selectedCategory, selectedSubcategory, setNumberOfProducts } = useCategory();
   const { Authorization } = useAuth();
   const { filters } = useFilter();
 
   // API Base URL - adjust this to match your backend
   const API_BASE_URL = 'http://localhost:5000/api/v1';
+
+  useEffect(() => {
+          setNumberOfProducts(filteredProducts.length);
+      }, [filteredProducts]);
 
   useEffect(() => {
     if (selectedCategory && Authorization) {
@@ -293,67 +298,67 @@ const ProductTable = ({ onProductClick }) => {
       throw err;
     }
   };
- 
+
   // Calculate pagination based on filtered products
   const fetchProductsBySubcategory = async () => {
-  try {
-    // Get subcategory ID from context
-    const subcategoryId = selectedSubcategory?.subcategory_id;
+    try {
+      // Get subcategory ID from context
+      const subcategoryId = selectedSubcategory?.subcategory_id;
 
-    if (!subcategoryId) {
-      throw new Error('No subcategory selected or subcategory ID not found');
-    }
-
-    // Fetch child subcategories using the subcategory ID as parent_id
-    const childSubcategoriesResponse = await axios.get(`${API_BASE_URL}/subcategories/${subcategoryId}`, {
-      headers: { 'Authorization': Authorization }
-    });
-
-    if (!childSubcategoriesResponse.data.success) {
-      throw new Error('Failed to fetch child subcategories');
-    }
-
-    const childSubcategories = childSubcategoriesResponse.data.data || [];
-
-    if (childSubcategories.length === 0) {
-      console.log("No child subcategories found, setting products to empty array");
-      setProducts([]);
-      return;
-    }
-
-    // Array to store all products from all child subcategories
-    let allProducts = [];
-
-    // Fetch products for each child subcategory
-    for (const childSubcategory of childSubcategories) {
-      try {
-        const productsResponse = await axios.get(`${API_BASE_URL}/products/subcategory/${childSubcategory.subcategory_id}`, {
-          headers: { 'Authorization': Authorization }
-        });
-
-        console.log(`Products response for subcategory ${childSubcategory.subcategory_id}:`, productsResponse.data);
-
-        if (productsResponse.data.success && productsResponse.data.data) {
-          // Add products from this subcategory to the allProducts array
-          allProducts = [...allProducts, ...productsResponse.data.data];
-          console.log(`Added ${productsResponse.data.data.length} products from subcategory ${childSubcategory.subcategory_id}`);
-        }
-      } catch (subError) {
-        console.error(`Error fetching products for subcategory ${childSubcategory.subcategory_id}:`, subError);
-        // Continue with other subcategories even if one fails
+      if (!subcategoryId) {
+        throw new Error('No subcategory selected or subcategory ID not found');
       }
+
+      // Fetch child subcategories using the subcategory ID as parent_id
+      const childSubcategoriesResponse = await axios.get(`${API_BASE_URL}/subcategories/${subcategoryId}`, {
+        headers: { 'Authorization': Authorization }
+      });
+
+      if (!childSubcategoriesResponse.data.success) {
+        throw new Error('Failed to fetch child subcategories');
+      }
+
+      const childSubcategories = childSubcategoriesResponse.data.data || [];
+
+      if (childSubcategories.length === 0) {
+        console.log("No child subcategories found, setting products to empty array");
+        setProducts([]);
+        return;
+      }
+
+      // Array to store all products from all child subcategories
+      let allProducts = [];
+
+      // Fetch products for each child subcategory
+      for (const childSubcategory of childSubcategories) {
+        try {
+          const productsResponse = await axios.get(`${API_BASE_URL}/products/subcategory/${childSubcategory.subcategory_id}`, {
+            headers: { 'Authorization': Authorization }
+          });
+
+          console.log(`Products response for subcategory ${childSubcategory.subcategory_id}:`, productsResponse.data);
+
+          if (productsResponse.data.success && productsResponse.data.data) {
+            // Add products from this subcategory to the allProducts array
+            allProducts = [...allProducts, ...productsResponse.data.data];
+            console.log(`Added ${productsResponse.data.data.length} products from subcategory ${childSubcategory.subcategory_id}`);
+          }
+        } catch (subError) {
+          console.error(`Error fetching products for subcategory ${childSubcategory.subcategory_id}:`, subError);
+          // Continue with other subcategories even if one fails
+        }
+      }
+
+      // Set all collected products to state
+      setProducts(allProducts);
+
+    } catch (err) {
+      console.error('Error fetching products by subcategory:', err);
+      setProducts([]);
+      throw err;
     }
+  };
 
-    // Set all collected products to state
-    setProducts(allProducts);
-
-  } catch (err) {
-    console.error('Error fetching products by subcategory:', err);
-    setProducts([]);
-    throw err;
-  }
-};
-  
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -414,15 +419,15 @@ const ProductTable = ({ onProductClick }) => {
   if (!loading && filteredProducts.length === 0 && products.length === 0) {
 
     console.log("filteredProducts.length: ", filteredProducts.length);
-    console.log(filteredProducts);    
+    console.log(filteredProducts);
     console.log("typeof filteredProducts.length: ", typeof filteredProducts);
-    
+
     console.log("products.length: ", products.length);
     console.log(products);
     console.log("typeof products.length: ", typeof products);
-    
-    
-    
+
+
+
     return (
       <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
         <Paper elevation={0} sx={{ p: 4 }}>
@@ -457,8 +462,8 @@ const ProductTable = ({ onProductClick }) => {
       {/* Header */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         {/* <img src={boxes} style={{ width: "30px" }} alt="Products" /> */}
-        <ViewModuleIcon style={{ fontSize: 35 }}/>
-        {/* {totalPages > 1 && ( */}
+        <ViewModuleIcon style={{ fontSize: 35 }} />
+        {/* {totalPages >= 1 && ( */}
         <CustomPagination
           count={totalPages}
           page={currentPage}
@@ -466,7 +471,7 @@ const ProductTable = ({ onProductClick }) => {
           color="primary"
           size="large"
         />
-        {/* )} */}
+        {/* )}  */}
       </Box>
 
       {/* Product Count */}
@@ -493,14 +498,14 @@ const ProductTable = ({ onProductClick }) => {
                   onError={(e) => {
                     e.target.src = 'https://via.placeholder.com/300x220?text=Product+Image';
                   }}
-                  style={{ margin: "12px auto 0 auto" }}    
+                  style={{ margin: "12px auto 0 auto" }}
                 />
               </Box>
 
               <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                 <Box mb={1}>
                   <Chip
-                    label={product.stock_availability_in_us ? '🇺🇸 Stock in USA' : '' }
+                    label={product.stock_availability_in_us ? '🇺🇸 Stock in USA' : ''}
                     size="small"
                     sx={{
                       backgroundColor: 'transparent',
@@ -534,7 +539,7 @@ const ProductTable = ({ onProductClick }) => {
                   className="add-to-cart-btn"
                   variant="contained"
                   onClick={(e) => handleAddToCart(e, product)}
-                  // size="large"
+                // size="large"
                 >
                   Add to Cart
                 </AddToCartButton>

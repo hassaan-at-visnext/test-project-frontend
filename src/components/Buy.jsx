@@ -5,6 +5,7 @@ import Searchbar from "./Searchbar";
 import ProductPageLayout from "./products/ProductPageLayout";
 import Product from "./products/Product";
 import Footer from "./Footer";
+import CategorySection from "./CategorySection";
 
 const Buy = () => {
     const [selectedProductId, setSelectedProductId] = useState(null);
@@ -22,12 +23,14 @@ const Buy = () => {
             <Navbar />
             <Searchbar />
             {selectedProductId ? (
-                <Product 
-                    productId={selectedProductId} 
+                <Product
+                    productId={selectedProductId}
                     onBackToProducts={handleBackToProducts}
                 />
-            ) : (
+            ) : (<>
+                <CategorySection />
                 <ProductPageLayout onProductClick={handleProductClick} />
+            </>
             )}
             <Footer />
         </Box>
