@@ -583,7 +583,7 @@ const ProductTable = ({ onProductClick }) => {
               <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                 <Box mb={1}>
                   <Chip
-                    label={product.stock_availability_in_us ? 'In Stock' : 'Stock in USA'}
+                    label={product.stock_availability_in_us ? '🇺🇸 Stock in USA' : '' }
                     size="small"
                     sx={{
                       backgroundColor: 'transparent',
@@ -595,7 +595,7 @@ const ProductTable = ({ onProductClick }) => {
                   />
                 </Box>
 
-                <Typography variant="h6" component="h3" fontWeight="600" mb={2} sx={{
+                <Typography variant="h6" component="h6" fontWeight="75" fontSize={17} sx={{
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
@@ -605,11 +605,11 @@ const ProductTable = ({ onProductClick }) => {
                 </Typography>
 
                 <Box flexGrow={1}>
-                  <Typography variant="h6" component="p" fontWeight="bold" color="black" mb={1}>
-                    ${product.price}/Piece
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography marginY={1} variant="body2" color="text.secondary">
                     MOQ: {product.moq?.toLocaleString() || 'N/A'} units
+                  </Typography>
+                  <Typography variant="body1" component="p" fontWeight="bold" color="black" mb={1}>
+                    $ {product.price} / Unit
                   </Typography>
                 </Box>
 
