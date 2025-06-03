@@ -9,6 +9,7 @@ import axios from "axios";
 
 const Searchbar = () => {
     const tableRef = useRef(null);
+    const containerRef = useRef(null);
     const { Authorization, isAuthenticated } = useAuth();
     const { selectedCategory, selectedSubcategory, setCategoryOnly, setCategoryAndSubcategory } = useCategory();
 
@@ -20,10 +21,26 @@ const Searchbar = () => {
     const [selectedCategoryDropdown, setSelectedCategoryDropdown] = useState({ category_id: null, name: "All Categories" });
     const open = Boolean(anchorEl);
 
+    // Sticky state
+    const [isSticky, setIsSticky] = useState(false);
+
     // Categories-and-subcategories dropdown work 
     const [openTable, setOpenTable] = useState(false);
     const [columns, setColumns] = useState([]);
     const [maxRows, setMaxRows] = useState(0);
+
+    // Sticky scroll handler
+    useEffect(() => {
+        const handleScroll = () => {
+            if (containerRef.current) {
+                const rect = containerRef.current.getBoundingClientRect();
+                setIsSticky(rect.top <= 0);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -189,8 +206,20 @@ const Searchbar = () => {
     };
 
     return (
-        <>
-            <Box ref={tableRef} display="flex" flexDirection="column" marginTop={2} p={2} borderRadius={2} sx={{ backgroundColor: "#F2F2F2", border: "1px solid #F2F2F2", width: "73%", position: "relative", zIndex: 1000 }}>
+        <Box 
+            ref={containerRef}
+            sx={{
+                width: '100%',
+                backgroundColor: isSticky ? '#F2F2F2' : 'white',
+                position: isSticky ? 'sticky' : 'relative',
+                top: isSticky ? 0 : 'auto',
+                zIndex: 1001,
+                display: 'flex',
+                justifyContent: 'center',
+                transition: 'background-color 0.3s ease'
+            }}
+        >
+            <Box ref={tableRef} display="flex" flexDirection="column" marginTop={0} p={2} borderRadius={2} sx={{ backgroundColor: "#F2F2F2", border: "1px solid #F2F2F2", width: "73%", position: "relative", zIndex: 1000 }}>
                 <Box display="flex" >
                     <Button color="inherit" onClick={() => setOpenTable(!openTable)} sx={{ backgroundColor: openTable ? '#ffffff' : 'transparent', marginX: "15px", textTransform: 'none', borderRadius: "20px", fontSize: "1.1rem" }}>
                         <img src={boxes} alt="icon" style={{ width: "20px", marginRight: "5px" }} />
@@ -198,7 +227,6 @@ const Searchbar = () => {
                     </Button>
 
                     <Box sx={{ position: 'relative', flexGrow: 1, marginX: "20px" }} >
-                        {/* <TextField size="small" fullWidth placeholder="What are you looking for?" sx={{ marginX: "20px", "& .MuiOutlinedInput-root": { borderRadius: "20px", backgroundColor: "white", "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, "&:hover fieldset": { border: "1px solid darkgrey" }, "&.Mui-focused fieldset": { border: "1px solid darkgrey" } } }} /> */}
                         <TextField
                             size="small"
                             fullWidth
@@ -306,7 +334,7 @@ const Searchbar = () => {
                     </Collapse>
                 </Box>
             </Box>
-        </>
+        </Box>
     );
 };
 
