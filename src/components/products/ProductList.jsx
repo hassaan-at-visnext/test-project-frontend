@@ -70,11 +70,12 @@ const AddToCartButton = styled(Button)({
 const CustomPagination = styled(Pagination)({
   '& .MuiPaginationItem-root': {
     '&.Mui-selected': {
-      backgroundColor: '#00B2C9',
-      color: 'white',
-      '&:hover': {
-        backgroundColor: '#009BB0',
-      }
+      backgroundColor: '#F2F2F2',
+      color: 'black',
+      border: "1px solid darkgrey"
+      // '&:hover': {
+      //   backgroundColor: '#009BB0',
+      // }
     }
   }
   
@@ -99,7 +100,7 @@ const ProductTable = ({ onProductClick }) => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const itemsPerPage = 12;
+  const itemsPerPage = 9;
 
   const { selectedCategory, selectedSubcategory, setNumberOfProducts } = useCategory();
   const { Authorization } = useAuth();
@@ -457,7 +458,7 @@ const ProductTable = ({ onProductClick }) => {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
+    <Container maxWidth="xl" sx={{ paddingBottom: 4, backgroundColor: 'white', minHeight: '100vh' }}>
       {/* <Paper elevation={0} sx={{ p: 4 }}> */}
       {/* Header */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -550,8 +551,8 @@ const ProductTable = ({ onProductClick }) => {
       </Box>
 
       {/* Bottom Pagination */}
-      {totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={4}>
+      {/* {totalPages > 1 && ( */}
+        <Box display="flex" justifyContent="right" mt={4}>
           <CustomPagination
             count={totalPages}
             page={currentPage}
@@ -560,7 +561,7 @@ const ProductTable = ({ onProductClick }) => {
             size="large"
           />
         </Box>
-      )}
+      {/* )} */}
       {/* </Paper> */}
     </Container>
   );
