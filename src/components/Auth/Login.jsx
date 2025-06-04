@@ -8,7 +8,7 @@ import * as Yup from "yup";
 import CryptoJS from "crypto-js";
 
 const LoginSchema = Yup.object().shape({
-    email: Yup.string().email("Incorrect email format").required("Email is required"),
+    email: Yup.string().transform((value) => value.trim()).email("Incorrect email format").required("Email is required"),
     password: Yup.string().min(6, "Incorrect Password").required("Password is required"),
 });
 
@@ -28,7 +28,7 @@ const Login = () => {
 
             const LOGIN_API = "http://localhost:5000/api/v1/auth/login";
             const res = await axios.post(LOGIN_API, {
-                email: values.email,
+                email: values.email.trim(),
                 password: encryptedPassword
             });
 
