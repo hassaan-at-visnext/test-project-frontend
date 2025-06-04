@@ -5,16 +5,11 @@ import { PersonOutline } from "@mui/icons-material";
 import dropdown from "../assets/drop_down.png";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-// import { useState } from "react";
+import ShoppingBasketOutlinedIcon from '@mui/icons-material/ShoppingBasketOutlined';
 
 const Navbar = () => {
     const navigate = useNavigate();
-    // const [firstname, setFirstname] = useState('');
     const { logout, firstName } = useAuth();
-
-    // useEffect(() => {
-    //     setFirstname(firstName);
-    // }, [firstName]);
 
     const handleLogout = () => {
         logout();
@@ -55,7 +50,7 @@ const Navbar = () => {
                 <Box marginLeft="auto" marginTop={2} >
                     <Button variant="outlined" startIcon={<PersonOutline />} sx={{ textTransform: "none", borderRadius: "20px", border: "1px solid #00B2C9", color: "#00B2C9", marginRight: 1 }}>{firstName}</Button>
                     <Button variant="outlined" onClick={handleLogout} sx={{ textTransform: "none", borderRadius: "20px", border: "1px solid rgb(4, 221, 167)", color: "rgb(4, 221, 167)" }}>Log out</Button>
-                </Box>
+                    <Button startIcon={<ShoppingBasketOutlinedIcon />} sx={{ color: "rgb(4, 221, 167)", fontSize: "large" }}></Button>                </Box>
             </Box>
         </Box>
     )
