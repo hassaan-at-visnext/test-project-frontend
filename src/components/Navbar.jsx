@@ -1,17 +1,25 @@
 import { Box, Button, Typography } from "@mui/material";
 import logo from "../assets/bh-logo-blue-n.png";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { PersonOutline } from "@mui/icons-material";
 import dropdown from "../assets/drop_down.png";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+// import { useState } from "react";
 
 const Navbar = () => {
     const navigate = useNavigate();
-    const { logout } = useAuth();
+    // const [firstname, setFirstname] = useState('');
+    const { logout, firstName } = useAuth();
+
+    // useEffect(() => {
+    //     setFirstname(firstName);
+    // }, [firstName]);
+
     const handleLogout = () => {
         logout();
         navigate('/');
-    }  
+    }
 
     return (
         <Box component="nav" marginBottom={2} display="flex" alignItems="center" padding="1rem" sx={{ width: "77%" }}>
@@ -27,11 +35,11 @@ const Navbar = () => {
 
                     {/* Dropdown for About Us */}
                     <Box sx={{ position: "relative", "&:hover .dropdown": { display: "block" } }}>
-                        <Button sx={{ textTransform: 'none' }} color="inherit" 
+                        <Button sx={{ textTransform: 'none' }} color="inherit"
                         // endIcon={<ArrowDropDownIcon />}
                         >
                             About Us
-                            <img src={dropdown} alt="dropdown icon" style={{ width: "15px", marginLeft: "10px", flexShrink: "0"}}/>
+                            <img src={dropdown} alt="dropdown icon" style={{ width: "15px", marginLeft: "10px", flexShrink: "0" }} />
                         </Button>
                         <Box className="dropdown" sx={{ display: "none", position: "absolute", zIndex: 1100, top: "100%", left: 0, bgcolor: "background.paper", border: "1px solid lightgrey", minWidth: 150, borderRadius: 1 }}>
                             <Box sx={{ padding: "0.5rem 1rem", cursor: "pointer", "&:hover": { bgcolor: "grey.100" } }}>
@@ -45,7 +53,8 @@ const Navbar = () => {
                 </Box>
 
                 <Box marginLeft="auto" marginTop={2} >
-                    <Button variant="outlined" onClick={handleLogout} sx={{ textTransform: "none", borderRadius: "16px", border: "1px solid #00B2C9", color: "#00B2C9" }}>Log out</Button>
+                    <Button variant="outlined" startIcon={<PersonOutline />} sx={{ textTransform: "none", borderRadius: "20px", border: "1px solid #00B2C9", color: "#00B2C9", marginRight: 1 }}>{firstName}</Button>
+                    <Button variant="outlined" onClick={handleLogout} sx={{ textTransform: "none", borderRadius: "20px", border: "1px solid rgb(4, 221, 167)", color: "rgb(4, 221, 167)" }}>Log out</Button>
                 </Box>
             </Box>
         </Box>

@@ -4,9 +4,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-
 const Login = () => {
-    const { login } = useAuth();
+    const { login, setName } = useAuth();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
@@ -25,8 +24,9 @@ const Login = () => {
             const res = await axios.post(LOGIN_API, {email, password});
 
             if (res.status === 200) {
-                const {data: token} = res.data;
+                const {data: token, name} = res.data;
                 login(token);
+                setName(name);
                 navigate('/buy');
             } else {
                 setError("Invalid Credentials");

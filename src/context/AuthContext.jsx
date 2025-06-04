@@ -7,9 +7,15 @@ export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [Authorization, setAuthorization] = useState('');
+    const [firstName, setFirstName] = useState('');
 
     useEffect(() => {
         const token = localStorage.getItem('token');
+        const storedFirstName = localStorage.getItem('firstName');
+
+        if (storedFirstName) {
+            setFirstName(storedFirstName);
+        }
 
         const validUser = async () => {
             if (!token) {
@@ -44,15 +50,21 @@ export const AuthProvider = ({ children }) => {
 
     const login = (token) => {
         localStorage.setItem('token', token);
-        setIsAuthenticated(true)
+        setIsAuthenticated(true);
     }
 
     const logout = () => {
         localStorage.removeItem('token');
         setIsAuthenticated(false);
     }
+
+    const setName = (first_name) => {
+        setFirstName(first_name);    
+        localStorage.setItem('firstName', first_name);    
+    }
+
     return (
-        <AuthContext.Provider value={{ isAuthenticated, isLoading, Authorization, login, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, isLoading, Authorization, firstName, setName, login, logout }}>
             {children}
         </AuthContext.Provider>
     )
