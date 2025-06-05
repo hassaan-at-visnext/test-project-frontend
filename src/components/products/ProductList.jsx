@@ -13,9 +13,8 @@ import {
   CircularProgress
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import axios from 'axios';
 import { useCategory } from '../../context/CategoryContext';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, authAxios } from '../../context/AuthContext';
 import { useSearch } from "../../context/SearchContext";
 import { useFilter } from '../../context/FilterContext';
 import boxes from "../../assets/icons8-boxes-90.png";
@@ -103,7 +102,6 @@ const ProductTable = ({ onProductClick }) => {
   const itemsPerPage = 9;
 
   const { selectedCategory, selectedSubcategory, setNumberOfProducts } = useCategory();
-  const { Authorization } = useAuth();
   const { filters } = useFilter();
 
   // API Base URL - adjust this to match your backend
@@ -114,10 +112,10 @@ const ProductTable = ({ onProductClick }) => {
       }, [filteredProducts]);
 
   useEffect(() => {
-    if (selectedCategory && Authorization) {
+    if (selectedCategory) {
       fetchProducts();
     }
-  }, [selectedCategory, selectedSubcategory, Authorization]);
+  }, [selectedCategory, selectedSubcategory]);
 
   // Apply filters whenever products or filters change
   useEffect(() => {
@@ -221,9 +219,7 @@ const ProductTable = ({ onProductClick }) => {
 
   const fetchAllProducts = async () => {
     try {
-      const productsResponse = await axios.get(`${API_BASE_URL}/products/all`, {
-        headers: { 'Authorization': Authorization }
-      });
+      const productsResponse = await authAxios.get(`${API_BASE_URL}/products/all`);
 
       if (productsResponse.data.success) {
         setProducts(productsResponse.data.data || []);
@@ -231,6 +227,10 @@ const ProductTable = ({ onProductClick }) => {
         setProducts([]);
       }
     } catch (err) {
+      // Auth errors are handled by interceptor, only handle other errors
+      if (err.response && (err.response.status === 401 || err.response.status === 409)) {
+        return; // Let interceptor handle auth errors
+      }
       throw err;
     }
   };
@@ -261,9 +261,7 @@ const ProductTable = ({ onProductClick }) => {
   const fetchProductsByCategory = async () => {
     try {
       // Get all categories first
-      const categoriesResponse = await axios.get(`${API_BASE_URL}/categories`, {
-        headers: { 'Authorization': Authorization }
-      });
+      const categoriesResponse = await authAxios.get(`${API_BASE_URL}/categories`);
 
       if (!categoriesResponse.data.success) {
         throw new Error('Failed to fetch categories');
@@ -286,9 +284,7 @@ const ProductTable = ({ onProductClick }) => {
       }
 
       // Fetch products by category ID
-      const productsResponse = await axios.get(`${API_BASE_URL}/products/category/${category.category_id}`, {
-        headers: { 'Authorization': Authorization }
-      });
+      const productsResponse = await authAxios.get(`${API_BASE_URL}/products/category/${category.category_id}`);
 
       if (productsResponse.data.success) {
         setProducts(productsResponse.data.data || []);
@@ -296,6 +292,10 @@ const ProductTable = ({ onProductClick }) => {
         setProducts([]);
       }
     } catch (err) {
+      // Auth errors are handled by interceptor
+      if (err.response && (err.response.status === 401 || err.response.status === 409)) {
+        return; // Let interceptor handle auth errors
+      }
       throw err;
     }
   };
@@ -311,9 +311,7 @@ const ProductTable = ({ onProductClick }) => {
       }
 
       // Fetch child subcategories using the subcategory ID as parent_id
-      const childSubcategoriesResponse = await axios.get(`${API_BASE_URL}/subcategories/${subcategoryId}`, {
-        headers: { 'Authorization': Authorization }
-      });
+      const childSubcategoriesResponse = await authAxios.get(`${API_BASE_URL}/subcategories/${subcategoryId}`);
 
       if (!childSubcategoriesResponse.data.success) {
         throw new Error('Failed to fetch child subcategories');
@@ -333,9 +331,7 @@ const ProductTable = ({ onProductClick }) => {
       // Fetch products for each child subcategory
       for (const childSubcategory of childSubcategories) {
         try {
-          const productsResponse = await axios.get(`${API_BASE_URL}/products/subcategory/${childSubcategory.subcategory_id}`, {
-            headers: { 'Authorization': Authorization }
-          });
+          const productsResponse = await authAxios.get(`${API_BASE_URL}/products/subcategory/${childSubcategory.subcategory_id}`);
 
           console.log(`Products response for subcategory ${childSubcategory.subcategory_id}:`, productsResponse.data);
 
@@ -356,6 +352,10 @@ const ProductTable = ({ onProductClick }) => {
     } catch (err) {
       console.error('Error fetching products by subcategory:', err);
       setProducts([]);
+      // Auth errors are handled by interceptor
+      if (err.response && (err.response.status === 401 || err.response.status === 409)) {
+        return; // Let interceptor handle auth errors
+      }
       throw err;
     }
   };
@@ -365,8 +365,7 @@ const ProductTable = ({ onProductClick }) => {
   const endIndex = startIndex + itemsPerPage;
   const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
-  const handleAddToCart = (e, product) => {
-    e.stopPropagation(); // Prevent card click when clicking add to cart
+  const handleAddToCart = (e, product) => {    e.stopPropagation(); // Prevent card click when clicking add to cart
     // TODO: Implement actual cart functionality
     alert(`Added ${product.name} to cart!`);
   };

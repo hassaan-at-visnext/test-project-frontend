@@ -2,15 +2,14 @@ import { Box, Button, Table, TableCell, TableContainer, TableRow, TableHead, Tab
 import boxes from "../assets/categories.png";
 import dropdown from "../assets/drop_down.png";
 import { useEffect, useState, useRef } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth, authAxios } from "../context/AuthContext";
 import { useCategory } from "../context/CategoryContext";
 import { useSearch } from "../context/SearchContext";
-import axios from "axios";
 
 const Searchbar = () => {
     const tableRef = useRef(null);
     const containerRef = useRef(null);
-    const { Authorization, isAuthenticated } = useAuth();
+    const { isAuthenticated } = useAuth();
     const { selectedCategory, selectedSubcategory, setCategoryOnly, setCategoryAndSubcategory } = useCategory();
 
     const { searchTerm, setSearchTerm } = useSearch();
@@ -46,11 +45,7 @@ const Searchbar = () => {
         const fetchData = async () => {
             try {
                 const API_URI = "http://localhost:5000/api/v1/categories-subcategories";
-                const response = await axios.get(API_URI, {
-                    headers: {
-                        Authorization: Authorization
-                    }
-                });
+                const response = await authAxios.get(API_URI);
 
                 if (response.data.success && Array.isArray(response.data.data)) {
                     const transformed = response.data.data.map(cat => ({
@@ -68,26 +63,26 @@ const Searchbar = () => {
                     setMaxRows(max);
                 }
             } catch (error) {
+                // Auth errors are handled by interceptor, only handle other errors
+                if (error.response && (error.response.status === 401 || error.response.status === 409)) {
+                    return; // Let interceptor handle auth errors
+                }
                 console.error("Error fetching categories-subcategories: ", error);
                 setColumns([]);
                 setMaxRows(0);
             }
         };
 
-        if (Authorization && Authorization.trim() && isAuthenticated) {
+        if (isAuthenticated) {
             fetchData();
         }
-    }, [Authorization, isAuthenticated]);
+    }, [isAuthenticated]);
 
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const API_URI = "http://localhost:5000/api/v1/categories"
-                const response = await axios.get(API_URI, {
-                    headers: {
-                        Authorization: Authorization
-                    }
-                });
+                const response = await authAxios.get(API_URI);
 
                 if (response.data.success && Array.isArray(response.data.data)) {
                     // Store complete category data with both category_id and name
@@ -112,20 +107,24 @@ const Searchbar = () => {
                     setCategories([{ category_id: null, name: "All Categories" }]);
                 }
             } catch (error) {
+                // Auth errors are handled by interceptor, only handle other errors
+                if (error.response && (error.response.status === 401 || error.response.status === 409)) {
+                    return; // Let interceptor handle auth errors
+                }
                 console.error("API error: ", error);
                 // Set fallback categories if API fails
                 setCategories([{ category_id: null, name: "All Categories" }]);
             }
         }
 
-        // Only fetch if Authorization is available and not empty
-        if (Authorization && Authorization.trim() && isAuthenticated) {
+        // Only fetch if authenticated
+        if (isAuthenticated) {
             fetchCategories();
         } else {
-            // Set default if no authorization
+            // Set default if not authenticated
             setCategories([{ category_id: null, name: "All Categories" }]);
         }
-    }, [Authorization, isAuthenticated]);
+    }, [isAuthenticated]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
