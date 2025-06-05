@@ -100,7 +100,6 @@ const Searchbar = () => {
                     ];
 
                     setCategories(allCategories);
-                    console.log("categories fetched: ", allCategories);
                 } else {
                     console.error("Failed to fetch categories:", response.data);
                     // Set fallback categories if API fails

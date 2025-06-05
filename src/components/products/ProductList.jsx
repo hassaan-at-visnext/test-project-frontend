@@ -320,7 +320,6 @@ const ProductTable = ({ onProductClick }) => {
       const childSubcategories = childSubcategoriesResponse.data.data || [];
 
       if (childSubcategories.length === 0) {
-        console.log("No child subcategories found, setting products to empty array");
         setProducts([]);
         return;
       }
@@ -332,13 +331,10 @@ const ProductTable = ({ onProductClick }) => {
       for (const childSubcategory of childSubcategories) {
         try {
           const productsResponse = await authAxios.get(`${API_BASE_URL}/products/subcategory/${childSubcategory.subcategory_id}`);
-
-          console.log(`Products response for subcategory ${childSubcategory.subcategory_id}:`, productsResponse.data);
-
+          
           if (productsResponse.data.success && productsResponse.data.data) {
             // Add products from this subcategory to the allProducts array
             allProducts = [...allProducts, ...productsResponse.data.data];
-            console.log(`Added ${productsResponse.data.data.length} products from subcategory ${childSubcategory.subcategory_id}`);
           }
         } catch (subError) {
           console.error(`Error fetching products for subcategory ${childSubcategory.subcategory_id}:`, subError);
@@ -417,17 +413,6 @@ const ProductTable = ({ onProductClick }) => {
 
   // No products found
   if (!loading && filteredProducts.length === 0 && products.length === 0) {
-
-    console.log("filteredProducts.length: ", filteredProducts.length);
-    console.log(filteredProducts);
-    console.log("typeof filteredProducts.length: ", typeof filteredProducts);
-
-    console.log("products.length: ", products.length);
-    console.log(products);
-    console.log("typeof products.length: ", typeof products);
-
-
-
     return (
       <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
         <Paper elevation={0} sx={{ p: 4 }}>

@@ -208,8 +208,6 @@ const FilteredSidebar = () => {
         if (setCategoryAndSubcategory) {
             setCategoryAndSubcategory(selectedCategory, subcategory);
         }
-        console.log('Selected subcategory:', subcategory);
-        console.log('From category:', selectedCategory.name);
     };
 
     // Render functions for categories/subcategories
