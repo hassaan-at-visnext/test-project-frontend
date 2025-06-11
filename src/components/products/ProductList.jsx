@@ -24,26 +24,19 @@ const StyledCard = styled(Card)(({ theme }) => ({
   height: '100%',
   display: 'flex',
   flexDirection: 'column',
-  // transition: 'all 0.3s ease-in-out',
   position: 'relative',
   cursor: 'pointer',
   boxShadow: 'none',
   border: 'none',
   '&:hover': {
-    // transform: 'translateY(-4px)',
     boxShadow: theme.shadows[8],
-    // '& .product-image': {
-    //   transform: 'scale(1.05)',
-    // },
     '& .add-to-cart-btn': {
       opacity: 1,
-      // transform: 'translateY(0)',
     }
   }
 }));
 
 const ProductImage = styled(CardMedia)({
-  // transition: 'transform 0.3s ease-in-out',
   width: '80%',
   height: '220px',
   objectFit: 'cover',
@@ -72,12 +65,8 @@ const CustomPagination = styled(Pagination)({
       backgroundColor: '#F2F2F2',
       color: 'black',
       border: "1px solid darkgrey"
-      // '&:hover': {
-      //   backgroundColor: '#009BB0',
-      // }
     }
   }
-  
 });
 
 const CustomGridItem = styled(Box)({
@@ -96,165 +85,129 @@ const ProductTable = ({ onProductClick }) => {
   const { searchTerm } = useSearch();
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const itemsPerPage = 9;
+  const [pagination, setPagination] = useState({
+    totalPages: 0,
+    totalItems: 0,
+    page: 1,
+    limit: 9
+  });
 
   const { selectedCategory, selectedSubcategory, setNumberOfProducts } = useCategory();
   const { filters } = useFilter();
 
-  // API Base URL - adjust this to match your backend
+  // API Base URL
   const API_BASE_URL = 'http://localhost:5000/api/v1';
 
+  // Update number of products for context
   useEffect(() => {
-          setNumberOfProducts(filteredProducts.length);
-      }, [filteredProducts]);
+    setNumberOfProducts(pagination.totalItems);
+  }, [pagination.totalItems, setNumberOfProducts]);
 
+  // Fetch products when category, subcategory, filters, or page changes
   useEffect(() => {
     if (selectedCategory) {
       fetchProducts();
     }
-  }, [selectedCategory, selectedSubcategory]);
+  }, [selectedCategory, selectedSubcategory, filters, searchTerm, currentPage]);
 
-  // Apply filters whenever products or filters change
+  // Reset to page 1 when filters change
   useEffect(() => {
-    applyFilters();
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [products, filters, searchTerm]);
-
-  const applyFilters = () => {
-    let filtered = [...products];
-
-    if (searchTerm.trim()) {
-      filtered = filtered.filter(product => product.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (currentPage !== 1) {
+      setCurrentPage(1);
     }
+  }, [filters, searchTerm, selectedCategory, selectedSubcategory]);
 
-    // Price Filter
-    if (filters.minPrice > 0 || filters.maxPrice > 0) {
-      filtered = filtered.filter(product => {
-        const price = parseFloat(product.price) || 0;
-        const minPrice = parseFloat(filters.minPrice) || 0;
-        const maxPrice = parseFloat(filters.maxPrice) || Infinity;
-
-        if (maxPrice === 0) {
-          return price >= minPrice;
-        }
-        return price >= minPrice && price <= maxPrice;
-      });
+  // Build query parameters for API call
+  const buildQueryParams = () => {
+    const params = new URLSearchParams();
+    
+    // Pagination
+    params.append('page', currentPage.toString());
+    params.append('limit', pagination.limit.toString());
+    
+    // Price range
+    if (filters.minPrice > 0) {
+      params.append('from', filters.minPrice.toString());
     }
-
-    // MOQ Filter
+    if (filters.maxPrice > 0) {
+      params.append('to', filters.maxPrice.toString());
+    }
+    
+    // MOQ
     if (filters.moq && filters.moq.toString().trim() !== '') {
-      const maxMoq = parseInt(filters.moq) || 0;
-      filtered = filtered.filter(product => {
-        const productMoq = parseInt(product.moq) || 0;
-        return productMoq <= maxMoq;
-      });
+      params.append('moq', filters.moq.toString());
     }
-
-    // Product Certifications Filter (AND condition - all selected must be present)
+    
+    // Product certifications
     if (filters.selectedCertifications && filters.selectedCertifications.length > 0) {
-      filtered = filtered.filter(product => {
-        const productCerts = product.product_certifications || [];
-        // Convert to array if it's a string
-        const certsArray = Array.isArray(productCerts)
-          ? productCerts
-          : (typeof productCerts === 'string' ? productCerts.split(',').map(c => c.trim()) : []);
-
-        return filters.selectedCertifications.every(selectedCert =>
-          certsArray.some(productCert =>
-            productCert.toLowerCase().includes(selectedCert.toLowerCase())
-            // productCert.trim().toLowerCase() === selectedCert.trim().toLowerCase()
-          )
-        );
-      });
+      params.append('product_certifications', filters.selectedCertifications.join(','));
     }
-
-    // Supplier Certifications Filter (AND condition - all selected must be present)
+    
+    // Supplier certifications
     if (filters.selectedSupplierCertifications && filters.selectedSupplierCertifications.length > 0) {
-      filtered = filtered.filter(product => {
-        const supplierCerts = product.supplier_certifications || [];
-        // Convert to array if it's a string
-        const certsArray = Array.isArray(supplierCerts)
-          ? supplierCerts
-          : (typeof supplierCerts === 'string' ? supplierCerts.split(',').map(c => c.trim()) : []);
-
-        return filters.selectedSupplierCertifications.every(selectedCert =>
-          certsArray.some(supplierCert =>
-            supplierCert.toLowerCase().includes(selectedCert.toLowerCase())
-          )
-        );
-      });
+      params.append('supplier_certifications', filters.selectedSupplierCertifications.join(','));
     }
-
-    // Manufacturer Location Filter (OR condition - any selected location matches)
+    
+    // Manufacturer location
     if (filters.selectedManufacturerLocations && filters.selectedManufacturerLocations.length > 0) {
-      filtered = filtered.filter(product => {
-        const productLocation = product.manufacturer_location || '';
-        return filters.selectedManufacturerLocations.some(selectedLocation =>
-          productLocation.toLowerCase().includes(selectedLocation.toLowerCase())
-        );
-      });
+      params.append('manufacturer_location', filters.selectedManufacturerLocations.join(','));
     }
-
-    // Stock in USA Filter
+    
+    // Stock in USA
     if (filters.stockInUSA) {
-      filtered = filtered.filter(product => product.stock_availability_in_us === true);
+      params.append('stock_availability_in_us', 'true');
     }
+    
+    return params.toString();
+  };
 
-    setFilteredProducts(filtered);
+  // Apply search term filtering on client side (since it's not in API)
+  const applySearchFilter = (productsData) => {
+    if (!searchTerm.trim()) {
+      return productsData;
+    }
+    
+    return productsData.filter(product => 
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   };
 
   const isAllCategoriesSelected = () => {
     if (!selectedCategory) return false;
-
-    // Check if it's the "All Categories" option (category_id is null)
-    if (selectedCategory.category_id === null && selectedCategory.name === "All Categories") {
-      return true;
-    }
-
-    return false;
+    return selectedCategory.category_id === null && selectedCategory.name === "All Categories";
   };
 
   const fetchAllProducts = async () => {
     try {
-      const productsResponse = await authAxios.get(`${API_BASE_URL}/products/all`);
+      const queryParams = buildQueryParams();
+      const response = await authAxios.get(`${API_BASE_URL}/products/all?${queryParams}`);
 
-      if (productsResponse.data.success) {
-        setProducts(productsResponse.data.data || []);
+      if (response.data.success) {
+        let productsData = response.data.data || [];
+        
+        // Apply search filter on client side
+        if (searchTerm.trim()) {
+          productsData = applySearchFilter(productsData);
+        }
+        
+        setProducts(productsData);
+        setPagination({
+          totalPages: response.data.totalPages || 0,
+          totalItems: response.data.totalItems || 0,
+          page: response.data.page || 1,
+          limit: response.data.limit || 9
+        });
       } else {
         setProducts([]);
+        setPagination({ totalPages: 0, totalItems: 0, page: 1, limit: 9 });
       }
     } catch (err) {
-      // Auth errors are handled by interceptor, only handle other errors
       if (err.response && (err.response.status === 401 || err.response.status === 409)) {
-        return; // Let interceptor handle auth errors
+        return;
       }
       throw err;
-    }
-  };
-
-  const fetchProducts = async () => {
-    setLoading(true);
-    setError(null);
-    setCurrentPage(1);
-
-    try {
-      if (isAllCategoriesSelected()) {
-        await fetchAllProducts();
-      } else if (selectedSubcategory) {
-        await fetchProductsBySubcategory();
-      } else {
-        await fetchProductsByCategory();
-      }
-    } catch (err) {
-      console.error('Error fetching products:', err);
-      setError(err.response?.data?.message || 'Failed to fetch products');
-      // setProducts([]);
-      // setFilteredProducts([]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -268,13 +221,10 @@ const ProductTable = ({ onProductClick }) => {
       }
 
       const categories = categoriesResponse.data.data;
-      // Safely extract the category name
-      const selectedCategoryName =
-        typeof selectedCategory === 'string'
-          ? selectedCategory
-          : selectedCategory?.name ?? '';
+      const selectedCategoryName = typeof selectedCategory === 'string'
+        ? selectedCategory
+        : selectedCategory?.name ?? '';
 
-      // Compare with normalized names
       const category = categories.find(cat =>
         cat.name.toLowerCase().trim() === selectedCategoryName.toLowerCase().trim()
       );
@@ -283,34 +233,45 @@ const ProductTable = ({ onProductClick }) => {
         throw new Error(`Category "${selectedCategory}" not found`);
       }
 
-      // Fetch products by category ID
-      const productsResponse = await authAxios.get(`${API_BASE_URL}/products/category/${category.category_id}`);
+      const queryParams = buildQueryParams();
+      const response = await authAxios.get(`${API_BASE_URL}/products/category/${category.category_id}?${queryParams}`);
 
-      if (productsResponse.data.success) {
-        setProducts(productsResponse.data.data || []);
+      if (response.data.success) {
+        let productsData = response.data.data || [];
+        
+        // Apply search filter on client side
+        if (searchTerm.trim()) {
+          productsData = applySearchFilter(productsData);
+        }
+        
+        setProducts(productsData);
+        setPagination({
+          totalPages: response.data.totalPages || 0,
+          totalItems: response.data.totalItems || 0,
+          page: response.data.page || 1,
+          limit: response.data.limit || 9
+        });
       } else {
         setProducts([]);
+        setPagination({ totalPages: 0, totalItems: 0, page: 1, limit: 9 });
       }
     } catch (err) {
-      // Auth errors are handled by interceptor
       if (err.response && (err.response.status === 401 || err.response.status === 409)) {
-        return; // Let interceptor handle auth errors
+        return;
       }
       throw err;
     }
   };
 
-  // Calculate pagination based on filtered products
   const fetchProductsBySubcategory = async () => {
     try {
-      // Get subcategory ID from context
       const subcategoryId = selectedSubcategory?.subcategory_id;
 
       if (!subcategoryId) {
         throw new Error('No subcategory selected or subcategory ID not found');
       }
 
-      // Fetch child subcategories using the subcategory ID as parent_id
+      // Get child subcategories
       const childSubcategoriesResponse = await authAxios.get(`${API_BASE_URL}/subcategories/${subcategoryId}`);
 
       if (!childSubcategoriesResponse.data.success) {
@@ -321,48 +282,87 @@ const ProductTable = ({ onProductClick }) => {
 
       if (childSubcategories.length === 0) {
         setProducts([]);
+        setPagination({ totalPages: 0, totalItems: 0, page: 1, limit: 9 });
         return;
       }
 
-      // Array to store all products from all child subcategories
       let allProducts = [];
+      let totalItems = 0;
 
       // Fetch products for each child subcategory
       for (const childSubcategory of childSubcategories) {
         try {
-          const productsResponse = await authAxios.get(`${API_BASE_URL}/products/subcategory/${childSubcategory.subcategory_id}`);
+          const queryParams = buildQueryParams();
+          const response = await authAxios.get(`${API_BASE_URL}/products/subcategory/${childSubcategory.subcategory_id}?${queryParams}`);
           
-          if (productsResponse.data.success && productsResponse.data.data) {
-            // Add products from this subcategory to the allProducts array
-            allProducts = [...allProducts, ...productsResponse.data.data];
+          if (response.data.success && response.data.data) {
+            allProducts = [...allProducts, ...response.data.data];
+            totalItems += response.data.totalItems || 0;
           }
         } catch (subError) {
           console.error(`Error fetching products for subcategory ${childSubcategory.subcategory_id}:`, subError);
-          // Continue with other subcategories even if one fails
         }
       }
 
-      // Set all collected products to state
+      // Apply search filter on client side
+      if (searchTerm.trim()) {
+        allProducts = applySearchFilter(allProducts);
+      }
+
       setProducts(allProducts);
+      setPagination({
+        totalPages: Math.ceil(allProducts.length / pagination.limit),
+        totalItems: allProducts.length,
+        page: currentPage,
+        limit: pagination.limit
+      });
 
     } catch (err) {
       console.error('Error fetching products by subcategory:', err);
       setProducts([]);
-      // Auth errors are handled by interceptor
+      setPagination({ totalPages: 0, totalItems: 0, page: 1, limit: 9 });
+      
       if (err.response && (err.response.status === 401 || err.response.status === 409)) {
-        return; // Let interceptor handle auth errors
+        return;
       }
       throw err;
     }
   };
 
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
 
-  const handleAddToCart = (e, product) => {    e.stopPropagation(); // Prevent card click when clicking add to cart
-    // TODO: Implement actual cart functionality
+    try {
+      if (isAllCategoriesSelected()) {
+        await fetchAllProducts();
+      } else if (selectedSubcategory) {
+        await fetchProductsBySubcategory();
+      } else {
+        await fetchProductsByCategory();
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setError(err.response?.data?.message || 'Failed to fetch products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // For client-side pagination when dealing with subcategories
+  const getPaginatedProducts = () => {
+    if (selectedSubcategory) {
+      const startIndex = (currentPage - 1) * pagination.limit;
+      const endIndex = startIndex + pagination.limit;
+      return products.slice(startIndex, endIndex);
+    }
+    return products;
+  };
+
+  const currentProducts = getPaginatedProducts();
+
+  const handleAddToCart = (e, product) => {
+    e.stopPropagation();
     alert(`Added ${product.name} to cart!`);
   };
 
@@ -375,6 +375,14 @@ const ProductTable = ({ onProductClick }) => {
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
+
+  // Calculate display indices
+  const startIndex = selectedSubcategory 
+    ? (currentPage - 1) * pagination.limit 
+    : (pagination.page - 1) * pagination.limit;
+  const endIndex = selectedSubcategory 
+    ? Math.min(startIndex + pagination.limit, products.length)
+    : Math.min(startIndex + pagination.limit, pagination.totalItems);
 
   // Loading state
   if (loading) {
@@ -412,28 +420,16 @@ const ProductTable = ({ onProductClick }) => {
   }
 
   // No products found
-  if (!loading && filteredProducts.length === 0 && products.length === 0) {
+  if (!loading && currentProducts.length === 0) {
     return (
       <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
         <Paper elevation={0} sx={{ p: 4 }}>
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
             <Typography variant="h6" color="text.secondary">
-              No products found for this {selectedSubcategory ? 'subcategory' : 'category'}.
-            </Typography>
-          </Box>
-        </Paper>
-      </Container>
-    );
-  }
-
-  // No products found after filtering
-  if (!loading && filteredProducts.length === 0 && products.length > 0) {
-    return (
-      <Container maxWidth="xl" sx={{ py: 4, backgroundColor: 'white', minHeight: '100vh' }}>
-        <Paper elevation={0} sx={{ p: 4 }}>
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-            <Typography variant="h6" color="text.secondary">
-              No products match the selected filters. Try adjusting your filters.
+              {searchTerm.trim() 
+                ? `No products found matching "${searchTerm}"`
+                : `No products found for this ${selectedSubcategory ? 'subcategory' : 'category'}`
+              }
             </Typography>
           </Box>
         </Paper>
@@ -443,28 +439,24 @@ const ProductTable = ({ onProductClick }) => {
 
   return (
     <Container maxWidth="xl" sx={{ paddingBottom: 4, backgroundColor: 'white', minHeight: '100vh' }}>
-      {/* <Paper elevation={0} sx={{ p: 4 }}> */}
       {/* Header */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        {/* <img src={boxes} style={{ width: "30px" }} alt="Products" /> */}
         <ViewModuleIcon style={{ fontSize: 35 }} />
-        {/* {totalPages >= 1 && ( */}
         <CustomPagination
-          count={totalPages}
+          count={pagination.totalPages}
           page={currentPage}
           onChange={handlePageChange}
           color="primary"
           size="large"
         />
-        {/* )}  */}
       </Box>
 
       {/* Product Count */}
       <Box textAlign="center" mb={4}>
         <Typography variant="body2" color="text.secondary">
-          {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
-          {products.length !== filteredProducts.length && (
-            <span> (filtered from {products.length} total)</span>
+          {startIndex + 1}-{endIndex} of {pagination.totalItems} products
+          {searchTerm.trim() && (
+            <span> matching "{searchTerm}"</span>
           )}
         </Typography>
       </Box>
@@ -524,7 +516,6 @@ const ProductTable = ({ onProductClick }) => {
                   className="add-to-cart-btn"
                   variant="contained"
                   onClick={(e) => handleAddToCart(e, product)}
-                // size="large"
                 >
                   Add to Cart
                 </AddToCartButton>
@@ -535,18 +526,15 @@ const ProductTable = ({ onProductClick }) => {
       </Box>
 
       {/* Bottom Pagination */}
-      {/* {totalPages > 1 && ( */}
-        <Box display="flex" justifyContent="right" mt={4}>
-          <CustomPagination
-            count={totalPages}
-            page={currentPage}
-            onChange={handlePageChange}
-            color="primary"
-            size="large"
-          />
-        </Box>
-      {/* )} */}
-      {/* </Paper> */}
+      <Box display="flex" justifyContent="right" mt={4}>
+        <CustomPagination
+          count={pagination.totalPages}
+          page={currentPage}
+          onChange={handlePageChange}
+          color="primary"
+          size="large"
+        />
+      </Box>
     </Container>
   );
 };

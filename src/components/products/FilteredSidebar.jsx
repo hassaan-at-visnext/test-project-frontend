@@ -163,6 +163,30 @@ const FilteredSidebar = () => {
         updateFilters({ stockInUSA: e.target.checked });
     };
 
+    // Handle price changes with debouncing
+    const handlePriceChange = (field, value, setFieldValue) => {
+        setFieldValue(field, value);
+        
+        // Debounce the filter update
+        const timeoutId = setTimeout(() => {
+            updateFilters({ [field]: value || 0 });
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    };
+
+    // Handle MOQ changes with debouncing
+    const handleMOQChange = (value, setFieldValue) => {
+        setFieldValue('moq', value);
+        
+        // Debounce the filter update
+        const timeoutId = setTimeout(() => {
+            updateFilters({ moq: value });
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    };
+
     useEffect(() => {
         const fetchCategoriesData = async () => {
             setLoading(true);
@@ -408,12 +432,11 @@ const FilteredSidebar = () => {
                                 {({ field, meta }) => (
                                     <TextField
                                         {...field}
-                                        value={filters.minPrice}
+                                        value={filters.minPrice || ''}
                                         onChange={(e) => {
                                             const trimmedValue = e.target.value.trimStart();
                                             if (/^\d*$/.test(trimmedValue) || trimmedValue === '') {
-                                                setFieldValue('minPrice', trimmedValue);
-                                                updateFilters({ minPrice: trimmedValue || 0 });
+                                                handlePriceChange('minPrice', trimmedValue, setFieldValue);
                                             }
                                         }}
                                         placeholder="from"
@@ -442,12 +465,11 @@ const FilteredSidebar = () => {
                                 {({ field, meta }) => (
                                     <TextField
                                         {...field}
-                                        value={filters.maxPrice}
+                                        value={filters.maxPrice || ''}
                                         onChange={(e) => {
                                             const trimmedValue = e.target.value.trimStart();
                                             if (/^\d*$/.test(trimmedValue) || trimmedValue === '') {
-                                                setFieldValue('maxPrice', trimmedValue);
-                                                updateFilters({ maxPrice: trimmedValue || 0 });
+                                                handlePriceChange('maxPrice', trimmedValue, setFieldValue);
                                             }
                                         }}
                                         placeholder="to"
@@ -492,12 +514,11 @@ const FilteredSidebar = () => {
                             {({ field, meta }) => (
                                 <TextField
                                     {...field}
-                                    value={filters.moq}
+                                    value={filters.moq || ''}
                                     onChange={(e) => {
                                         const trimmedValue = e.target.value.trimStart();
                                         if (/^\d*$/.test(trimmedValue) || trimmedValue === '') {
-                                            setFieldValue('moq', trimmedValue);
-                                            updateFilters({ moq: trimmedValue });
+                                            handleMOQChange(trimmedValue, setFieldValue);
                                         }
                                     }}
                                     size="small"
