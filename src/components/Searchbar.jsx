@@ -196,7 +196,7 @@ const Searchbar = () => {
             };
 
             const subcategoryObj = {
-                subcategory_id: subcategory.subcategoryId,  
+                subcategory_id: subcategory.subcategoryId,
                 subcategoryName: subcategory.subcategoryName
             };
 
@@ -225,18 +225,23 @@ const Searchbar = () => {
     // Custom input handler to prevent special characters and leading spaces
     const handleInputChange = (e, setFieldValue) => {
         let value = e.target.value;
-        
+
         // Remove any special characters except spaces
         value = value.replace(/[^a-zA-Z0-9\s]/g, '');
-        
+
         // Remove leading spaces for display
         const displayValue = value.replace(/^\s+/, '');
-        
+
         setFieldValue('searchInput', displayValue);
+
+        // If the search bar is cleared, immediately clear the search term
+        if (displayValue === '') {
+            setSearchTerm('');
+        }
     };
 
     return (
-        <Box 
+        <Box
             ref={containerRef}
             sx={{
                 width: '100%',
@@ -280,22 +285,22 @@ const Searchbar = () => {
                                                 }}
                                                 error={touched.searchInput && Boolean(errors.searchInput)}
                                                 helperText={touched.searchInput && errors.searchInput}
-                                                sx={{ 
-                                                    marginX: "20px", 
-                                                    "& .MuiOutlinedInput-root": { 
-                                                        borderRadius: "20px", 
-                                                        backgroundColor: "white", 
-                                                        "& fieldset": { 
-                                                            borderRadius: "20px", 
-                                                            border: "1px solid darkgrey" 
-                                                        }, 
-                                                        "&:hover fieldset": { 
-                                                            border: "1px solid darkgrey" 
-                                                        }, 
-                                                        "&.Mui-focused fieldset": { 
-                                                            border: "1px solid darkgrey" 
-                                                        } 
-                                                    } 
+                                                sx={{
+                                                    marginX: "20px",
+                                                    "& .MuiOutlinedInput-root": {
+                                                        borderRadius: "20px",
+                                                        backgroundColor: "white",
+                                                        "& fieldset": {
+                                                            borderRadius: "20px",
+                                                            border: "1px solid darkgrey"
+                                                        },
+                                                        "&:hover fieldset": {
+                                                            border: "1px solid darkgrey"
+                                                        },
+                                                        "&.Mui-focused fieldset": {
+                                                            border: "1px solid darkgrey"
+                                                        }
+                                                    }
                                                 }}
                                             />
                                         )}
