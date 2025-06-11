@@ -4,8 +4,8 @@ const FilterContext = createContext();
 
 export const FilterProvider = ({ children }) => {
     const [filters, setFilters] = useState({
-        minPrice: 0,  // Changed to number to match component
-        maxPrice: 5000,  // Changed to number to match component
+        minPrice: 0,  
+        maxPrice: 5000,  
         moq: '',
         selectedCertifications: [],
         selectedSupplierCertifications: [],

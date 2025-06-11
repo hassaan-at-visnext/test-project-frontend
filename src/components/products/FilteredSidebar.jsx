@@ -14,10 +14,9 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth, authAxios } from "../../context/AuthContext"; // Import authAxios
 import { useCategory } from "../../context/CategoryContext";
 import { useFilter } from "../../context/FilterContext";
-import axios from "axios";
 
 const FilteredSidebar = () => {
 
@@ -64,7 +63,7 @@ const FilteredSidebar = () => {
     // Categores and Subcategories states end
 
     // Context usage 
-    const { Authorization, isAuthenticated } = useAuth();
+    const { isAuthenticated } = useAuth(); // Remove Authorization, add isAuthenticated
     const { selectedCategory, setCategoryAndSubcategory } = useCategory();
     const { filters, updateFilters } = useFilter();
 
@@ -147,11 +146,7 @@ const FilteredSidebar = () => {
 
             try {
                 const API_URI = "http://localhost:5000/api/v1/categories-subcategories"
-                const response = await axios.get(API_URI, {
-                    headers: {
-                        Authorization: Authorization
-                    }
-                });
+                const response = await authAxios.get(API_URI); // Use authAxios instead of axios with manual headers
 
                 const data = response.data;
                 if (data.success) {
@@ -160,14 +155,22 @@ const FilteredSidebar = () => {
                     setError('Failed to fetch categories data');
                 }
             } catch (err) {
+                // Auth errors are handled by interceptor, only handle other errors
+                if (err.response && (err.response.status === 401 || err.response.status === 409)) {
+                    return; // Let interceptor handle auth errors
+                }
+                console.error("Error fetching categories-subcategories: ", err);
                 setError('Failed to fetch categories data');
             } finally {
                 setLoading(false);
             }
         }
 
-        fetchCategoriesData();
-    }, [Authorization]);
+        // Only fetch if authenticated
+        if (isAuthenticated) {
+            fetchCategoriesData();
+        }
+    }, [isAuthenticated]); // Change dependency from Authorization to isAuthenticated
 
     // Reset Search when category changes
     useEffect(() => {
