@@ -19,8 +19,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import axios from 'axios';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, authAxios } from '../../context/AuthContext';
 
 const StyledButton = styled(Button)({
   backgroundColor: '#00B2C9',
@@ -48,7 +47,6 @@ const ProductImage = styled('img')({
   objectFit: 'cover',
   borderRadius: '8px',
   border: '1px solid #e0e0e0',
-// border: "1px solid red"
 });
 
 const InfoCard = styled(Card)({
@@ -61,24 +59,22 @@ const Product = ({ productId, onBackToProducts }) => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { Authorization } = useAuth();
+  const { getToken, isAuthenticated } = useAuth();
 
   const API_BASE_URL = 'http://localhost:5000/api/v1';
 
   useEffect(() => {
-    if (productId && Authorization) {
+    if (productId && isAuthenticated) {
       fetchProductDetail();
     }
-  }, [productId, Authorization]);
+  }, [productId, isAuthenticated]);
 
   const fetchProductDetail = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/products/${productId}`, {
-        headers: { 'Authorization': Authorization }
-      });
+      const response = await authAxios.get(`${API_BASE_URL}/products/${productId}`);
 
       if (response.data.success) {
         setProduct(response.data.data);
@@ -93,10 +89,24 @@ const Product = ({ productId, onBackToProducts }) => {
     }
   };
 
-  const handleAddToCart = () => {
-    // TODO: Implement actual cart functionality
-    alert(`Added ${product.name} to cart!`);
-  };
+  // const handleAddToCart = async () => {
+  //   try {
+  //     // TODO: Replace with actual cart endpoint
+  //     const response = await authAxios.post(`${API_BASE_URL}/cart/add`, {
+  //       productId: product.id,
+  //       quantity: 1
+  //     });
+      
+  //     if (response.data.success) {
+  //       alert(`Added ${product.name} to cart!`);
+  //     } else {
+  //       alert('Failed to add item to cart');
+  //     }
+  //   } catch (err) {
+  //     console.error('Error adding to cart:', err);
+  //     alert('Error adding item to cart');
+  //   }
+  // };
 
   // Loading state
   if (loading) {
@@ -218,7 +228,7 @@ const Product = ({ productId, onBackToProducts }) => {
                   variant="contained"
                   size="large"
                   startIcon={<ShoppingCartIcon />}
-                //   onClick={handleAddToCart}
+                  // onClick={handleAddToCart}
                   sx={{ width: { xs: '100%', sm: 'auto' } }}
                 >
                   Add to Cart
