@@ -8,8 +8,14 @@ import * as Yup from "yup";
 import CryptoJS from "crypto-js";
 
 const LoginSchema = Yup.object().shape({
-    email: Yup.string().transform((value) => value.trim()).email("Incorrect email format").required("Email is required"),
-    password: Yup.string().min(6, "Incorrect Password").required("Password is required"),
+    email: Yup.string()
+        .transform((value) => value?.trim())
+        .email("Incorrect email format")
+        .required("Email is required"),
+    password: Yup.string()
+        .transform((value) => value?.trim())
+        .min(6, "Incorrect Password")
+        .required("Password is required"),
 });
 
 const Login = () => {
@@ -23,7 +29,6 @@ const Login = () => {
         setError("");
 
         try {
-
             const encryptedPassword = CryptoJS.AES.encrypt(values.password, 'my-secret-key').toString();
 
             const LOGIN_API = "http://localhost:5000/api/v1/auth/login";
@@ -48,6 +53,19 @@ const Login = () => {
         }
     };
 
+    // Custom handler to trim leading spaces from input
+    const handleInputChange = (e, handleChange, setFieldValue) => {
+        const { name, value } = e.target;
+        // Remove leading spaces but keep the rest of the string intact
+        const trimmedValue = value.replace(/^\s+/, '');
+        
+        // Update the field value without leading spaces
+        setFieldValue(name, trimmedValue);
+        
+        // Clear error when user starts typing
+        if (error) setError("");
+    };
+
     return (
         <Box maxWidth={400} mx="auto" mt={15} p={3} borderRadius={2} boxShadow={3}>
             <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -62,17 +80,15 @@ const Login = () => {
                 validationSchema={LoginSchema}
                 onSubmit={handleSubmit}
             >
-                {({ errors, touched, handleChange }) => (
+                {({ errors, touched, handleChange, setFieldValue, values }) => (
                     <Form>
                         <TextField
                             fullWidth
                             label="Email"
                             name="email"
+                            value={values.email}
                             margin="normal"
-                            onChange={(e) => {
-                                handleChange(e);
-                                if (error) setError("");
-                            }}
+                            onChange={(e) => handleInputChange(e, handleChange, setFieldValue)}
                             error={touched.email && Boolean(errors.email)}
                             helperText={touched.email && errors.email}
                         />
@@ -81,11 +97,9 @@ const Login = () => {
                             label="Password"
                             type="password"
                             name="password"
+                            value={values.password}
                             margin="normal"
-                            onChange={(e) => {
-                                handleChange(e);
-                                if (error) setError("");
-                            }}
+                            onChange={(e) => handleInputChange(e, handleChange, setFieldValue)}
                             error={touched.password && Boolean(errors.password)}
                             helperText={touched.password && errors.password}
                         />

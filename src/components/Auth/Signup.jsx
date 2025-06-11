@@ -8,12 +8,33 @@ import axios from "axios";
 import CryptoJS from "crypto-js";
 
 const SignupSchema = Yup.object().shape({
-    firstName: Yup.string().transform((value) => value?.trim()).required("First name is required").min(1, "First name cannot be empty or contain only spaces").matches(/^[^0-9]*$/, "First name cannot contain numbers"),
-    lastName: Yup.string().transform((value) => value?.trim()).required("Last name is required").min(1, "Last name cannot be empty or contain only spaces").matches(/^[^0-9]*$/, "Last name cannot contain numbers"),
-    companyName: Yup.string().transform((value) => value?.trim()).required("Company name is required").min(1, "Company name cannot be empty or contain only spaces"),
-    country: Yup.string().transform((value) => value?.trim()).required("Country name is required").min(1, "Country name cannot be empty or contain only spaces").matches(/^[^0-9]*$/, "Country name cannot contain numbers"),
-    email: Yup.string().transform((value) => value.trim()).email("Incorrect email format").required("Email is required"),
-    password: Yup.string().transform((value) => value?.trim()).min(6, "Password must be at least 6 characters").required("Password is required"),
+    firstName: Yup.string()
+        .transform((value) => value?.trim())
+        .required("First name is required")
+        .min(1, "First name cannot be empty or contain only spaces")
+        .matches(/^[^0-9]*$/, "First name cannot contain numbers"),
+    lastName: Yup.string()
+        .transform((value) => value?.trim())
+        .required("Last name is required")
+        .min(1, "Last name cannot be empty or contain only spaces")
+        .matches(/^[^0-9]*$/, "Last name cannot contain numbers"),
+    companyName: Yup.string()
+        .transform((value) => value?.trim())
+        .required("Company name is required")
+        .min(1, "Company name cannot be empty or contain only spaces"),
+    country: Yup.string()
+        .transform((value) => value?.trim())
+        .required("Country name is required")
+        .min(1, "Country name cannot be empty or contain only spaces")
+        .matches(/^[^0-9]*$/, "Country name cannot contain numbers"),
+    email: Yup.string()
+        .transform((value) => value?.trim())
+        .email("Incorrect email format")
+        .required("Email is required"),
+    password: Yup.string()
+        .transform((value) => value?.trim())
+        .min(6, "Password must be at least 6 characters")
+        .required("Password is required"),
 });
 
 const Signup = () => {
@@ -27,7 +48,6 @@ const Signup = () => {
         setError('');
 
         try {
-
             const encryptedPassword = CryptoJS.AES.encrypt(values.password.trim(), 'my-secret-key').toString();
 
             const SIGNUP_API = "http://localhost:5000/api/v1/auth/sign-up";
@@ -57,6 +77,19 @@ const Signup = () => {
         }
     }
 
+    // Custom handler to trim leading spaces from input
+    const handleInputChange = (e, handleChange, setFieldValue) => {
+        const { name, value } = e.target;
+        // Remove leading spaces but keep the rest of the string intact
+        const trimmedValue = value.replace(/^\s+/, '');
+        
+        // Update the field value without leading spaces
+        setFieldValue(name, trimmedValue);
+        
+        // Clear error when user starts typing
+        if (error) setError("");
+    };
+
     return (
         <Box maxWidth={400} mx="auto" mt={3} mb={3} p={3} boxShadow={3} borderRadius={2}>
             <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -78,17 +111,15 @@ const Signup = () => {
                 validationSchema={SignupSchema}
                 onSubmit={handleSubmit}
             >
-                {({ errors, touched, handleChange }) => (
+                {({ errors, touched, handleChange, setFieldValue, values }) => (
                     <Form>
                         <TextField
                             fullWidth
                             label="First Name"
                             name="firstName"
+                            value={values.firstName}
                             margin="normal"
-                            onChange={(e) => {
-                                handleChange(e);
-                                if (error) setError("");
-                            }}
+                            onChange={(e) => handleInputChange(e, handleChange, setFieldValue)}
                             error={touched.firstName && Boolean(errors.firstName)}
                             helperText={touched.firstName && errors.firstName}
                         />
@@ -96,11 +127,9 @@ const Signup = () => {
                             fullWidth
                             label="Last Name"
                             name="lastName"
+                            value={values.lastName}
                             margin="normal"
-                            onChange={(e) => {
-                                handleChange(e);
-                                if (error) setError("");
-                            }}
+                            onChange={(e) => handleInputChange(e, handleChange, setFieldValue)}
                             error={touched.lastName && Boolean(errors.lastName)}
                             helperText={touched.lastName && errors.lastName}
                         />
@@ -108,11 +137,9 @@ const Signup = () => {
                             fullWidth
                             label="Company Name"
                             name="companyName"
+                            value={values.companyName}
                             margin="normal"
-                            onChange={(e) => {
-                                handleChange(e);
-                                if (error) setError("");
-                            }}
+                            onChange={(e) => handleInputChange(e, handleChange, setFieldValue)}
                             error={touched.companyName && Boolean(errors.companyName)}
                             helperText={touched.companyName && errors.companyName}
                         />
@@ -120,11 +147,9 @@ const Signup = () => {
                             fullWidth
                             label="Country"
                             name="country"
+                            value={values.country}
                             margin="normal"
-                            onChange={(e) => {
-                                handleChange(e);
-                                if (error) setError("");
-                            }}
+                            onChange={(e) => handleInputChange(e, handleChange, setFieldValue)}
                             error={touched.country && Boolean(errors.country)}
                             helperText={touched.country && errors.country}
                         />
@@ -132,11 +157,9 @@ const Signup = () => {
                             fullWidth
                             label="Email"
                             name="email"
+                            value={values.email}
                             margin="normal"
-                            onChange={(e) => {
-                                handleChange(e);
-                                if (error) setError("");
-                            }}
+                            onChange={(e) => handleInputChange(e, handleChange, setFieldValue)}
                             error={touched.email && Boolean(errors.email)}
                             helperText={touched.email && errors.email}
                         />
@@ -145,11 +168,9 @@ const Signup = () => {
                             label="Password"
                             type="password"
                             name="password"
+                            value={values.password}
                             margin="normal"
-                            onChange={(e) => {
-                                handleChange(e);
-                                if (error) setError("");
-                            }}
+                            onChange={(e) => handleInputChange(e, handleChange, setFieldValue)}
                             error={touched.password && Boolean(errors.password)}
                             helperText={touched.password && errors.password}
                         />
