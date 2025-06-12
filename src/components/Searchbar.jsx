@@ -240,169 +240,252 @@ const Searchbar = () => {
         }
     };
 
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1022);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1022);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+
     return (
-        <Box
-            ref={containerRef}
-            sx={{
-                width: '100%',
-                backgroundColor: isSticky ? '#F2F2F2' : 'white',
-                position: isSticky ? 'sticky' : 'relative',
-                top: isSticky ? 0 : 'auto',
-                zIndex: 1001,
-                display: 'flex',
-                justifyContent: 'center',
-            }}
-        >
-            <Box ref={tableRef} display="flex" flexDirection="column" marginTop={0} p={2} borderRadius={2} sx={{ backgroundColor: "#F2F2F2", border: "1px solid #F2F2F2", width: "75%", position: "relative", zIndex: 1000 }}>
-                <Formik
-                    initialValues={initialValues}
-                    validationSchema={validationSchema}
-                    onSubmit={handleSearchSubmit}
-                >
-                    {({ values, errors, touched, setFieldValue, handleSubmit }) => (
-                        <Form>
-                            <Box display="flex" >
-                                <Button color="inherit" onClick={() => setOpenTable(!openTable)} sx={{ backgroundColor: openTable ? '#ffffff' : 'transparent', marginX: "15px", textTransform: 'none', borderRadius: "20px", fontSize: "1.1rem" }}>
-                                    <img src={boxes} alt="icon" style={{ width: "20px", marginRight: "5px" }} />
-                                    Categories
-                                </Button>
+        <>
+            <Box
+                ref={containerRef}
+                sx={{
+                    width: '100%',
+                    backgroundColor: isSticky ? '#F2F2F2' : 'white',
+                    position: isSticky ? 'sticky' : 'relative',
+                    top: isSticky ? 0 : 'auto',
+                    zIndex: 1001,
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}
+            >
+                <Box ref={tableRef} display="flex" flexDirection="column" marginTop={0} p={2} borderRadius={2} sx={{ backgroundColor: "#F2F2F2", border: "1px solid #F2F2F2", width: { xs: "95%", md: "92%", lg: "77%" }, mx: "auto", position: "relative", zIndex: 1000, pb: isSticky ? 0 : 2, }}>
+                    <Formik
+                        initialValues={initialValues}
+                        validationSchema={validationSchema}
+                        onSubmit={handleSearchSubmit}
+                    >
+                        {({ values, errors, touched, setFieldValue, handleSubmit }) => (
+                            <>
+                                <Form>
+                                    <Box display="flex" >
+                                        <Button color="inherit" onClick={() => setOpenTable(!openTable)} sx={{ display: { xs: 'none', md: 'flex' }, '@media (max-width:1022px)': { display: 'none' }, backgroundColor: openTable ? '#ffffff' : 'transparent', marginX: "15px", textTransform: 'none', borderRadius: "20px", fontSize: "1.1rem" }}>
+                                            <img src={boxes} alt="icon" style={{ width: "20px", marginRight: "5px" }} />
+                                            Categories
+                                        </Button>
 
-                                <Box sx={{ position: 'relative', flexGrow: 1, marginX: "20px" }} >
-                                    <Field name="searchInput">
-                                        {({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                size="small"
-                                                fullWidth
-                                                placeholder="What are you looking for?"
-                                                value={values.searchInput}
-                                                onChange={(e) => handleInputChange(e, setFieldValue)}
-                                                onKeyPress={(e) => {
-                                                    if (e.key === 'Enter') {
-                                                        e.preventDefault();
-                                                        handleSubmit();
-                                                    }
-                                                }}
-                                                error={touched.searchInput && Boolean(errors.searchInput)}
-                                                helperText={touched.searchInput && errors.searchInput}
-                                                sx={{
-                                                    marginX: "20px",
-                                                    "& .MuiOutlinedInput-root": {
-                                                        borderRadius: "20px",
-                                                        backgroundColor: "white",
-                                                        "& fieldset": {
-                                                            borderRadius: "20px",
-                                                            border: "1px solid darkgrey"
-                                                        },
-                                                        "&:hover fieldset": {
-                                                            border: "1px solid darkgrey"
-                                                        },
-                                                        "&.Mui-focused fieldset": {
-                                                            border: "1px solid darkgrey"
-                                                        }
-                                                    }
-                                                }}
-                                            />
-                                        )}
-                                    </Field>
-
-                                    {/* Vertical separator line */}
-                                    <Box sx={{ position: 'absolute', right: '220px', top: '50%', transform: 'translateY(-50%)', width: '1px', height: '60%', backgroundColor: '#ccc' }} />
-
-                                    {/* Categories dropdown button */}
-                                    <Button color="inherit" sx={{ position: 'absolute', right: "8px", top: "50%", transform: "translateY(-50%)", textTransform: 'none', fontSize: "0.9rem", minWidth: '130px', height: "32px", padding: "4px 8px", display: "flex", alignItems: 'center', gap: '8px' }}
-                                        onClick={handleClick}
-                                        aria-controls={open ? 'categories-menu' : undefined}
-                                        aria-haspopup="true"
-                                        aria-expanded={open ? 'true' : undefined}
-                                    >
-                                        <Typography variant="body2" sx={{ fontSize: "0.85rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: displaySelectedCategory() === "All Categories" ? "grey.500" : "text.primary", flex: 1 }}>
-                                            {displaySelectedCategory()}
-                                        </Typography>
-                                        <img src={dropdown} alt="dropdown icon" style={{ width: "15px", marginLeft: "10px", flexShrink: "0" }} />
-                                    </Button>
-                                    <Menu id="categories-menu" anchorEl={anchorEl} open={open} onClose={handleClose} MenuListProps={{ 'aria-labelledby': 'categories-button' }} sx={{ '& .MuiPaper-root': { borderRadius: '10px', marginTop: '5px', boxShadow: "none", border: "1px solid darkgrey", backgroundColor: "#F5F5F5" } }}>
-                                        {categories.map((category) => (
-                                            <MenuItem
-                                                key={category.category_id || 'all-categories'}
-                                                onClick={() => handleCategorySelect(category)}
-                                                sx={{
-                                                    fontSize: '0.9rem',
-                                                    color: category.name === "All Categories" ? 'grey.500' : 'text.primary',
-                                                    '&:hover': { backgroundColor: "lightgrey" }
-                                                }}
-                                            >
-                                                {category.name || "Invalid Category"}
-                                            </MenuItem>
-                                        ))}
-                                    </Menu>
-                                </Box>
-
-                                <Button
-                                    type="submit"
-                                    variant="contained"
-                                    sx={{ width: "12%", marginX: "10px", backgroundColor: "#00B2C9", border: "1px solid #00B2C9", textTransform: "none", borderRadius: "20px" }}>
-                                    Search
-                                </Button>
-                            </Box>
-                        </Form>
-                    )}
-                </Formik>
-
-                {/* Categories-subcategories dropdown */}
-                <Box sx={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 1000, backgroundColor: "#F2F2F2", borderRadius: "0 0 8px 8px", boxShadow: openTable ? "0 4px 8px rgba(0,0,0,0.1)" : "none", overflow: "hidden" }}>
-                    <Collapse in={openTable}>
-                        <TableContainer component={Paper} elevation={0} sx={{ maxWidth: "100%", overflowX: "auto", backgroundColor: "#F2F2F2", mx: "auto" }}>
-                            <Table size="small">
-                                <TableHead>
-                                    <TableRow>
-                                        {columns.map((col, index) => (
-                                            <TableCell
-                                                key={index}
-                                                onClick={() => handleTableCategoryClick(col.categoryName)}
-                                                sx={{
-                                                    fontWeight: "bold",
-                                                    fontSize: "0.8rem",
-                                                    borderBottom: "none",
-                                                    cursor: "pointer",
-                                                    '&:hover': { color: "#29B574" }
-                                                }}
-                                            >
-                                                {col.categoryName}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {Array.from({ length: maxRows }).map((_, rowIndex) => (
-                                        <TableRow key={rowIndex}>
-                                            {columns.map((col, colIndex) => {
-                                                const sub = col.subcategories[rowIndex];
-                                                return (
-                                                    <TableCell
-                                                        key={colIndex}
-                                                        onClick={() => sub && handleSubcategoryClick(sub)}
+                                        <Box sx={{ position: 'relative', flexGrow: 1, marginX: "20px" }} >
+                                            <Field name="searchInput">
+                                                {({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        size="small"
+                                                        fullWidth
+                                                        placeholder="What are you looking for?"
+                                                        value={values.searchInput}
+                                                        onChange={(e) => handleInputChange(e, setFieldValue)}
+                                                        onKeyPress={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                e.preventDefault();
+                                                                handleSubmit();
+                                                            }
+                                                        }}
+                                                        error={touched.searchInput && Boolean(errors.searchInput)}
+                                                        helperText={touched.searchInput && errors.searchInput}
                                                         sx={{
-                                                            fontSize: "0.7rem",
-                                                            paddingY: "0.125rem",
-                                                            borderBottom: "none",
-                                                            cursor: sub ? "pointer" : "default",
-                                                            '&:hover': sub ? { color: "#29B574" } : {}
+                                                            marginX: "20px",
+                                                            "& .MuiOutlinedInput-root": {
+                                                                borderRadius: "20px",
+                                                                backgroundColor: "white",
+                                                                "& fieldset": {
+                                                                    borderRadius: "20px",
+                                                                    border: "1px solid darkgrey"
+                                                                },
+                                                                "&:hover fieldset": {
+                                                                    border: "1px solid darkgrey"
+                                                                },
+                                                                "&.Mui-focused fieldset": {
+                                                                    border: "1px solid darkgrey"
+                                                                }
+                                                            }
+                                                        }}
+                                                    />
+                                                )}
+                                            </Field>
+
+                                            {/* Vertical separator line */}
+                                            <Box sx={{ '@media (max-width:1021px)': { display: 'none' }, position: 'absolute', right: '220px', top: '50%', transform: 'translateY(-50%)', width: '1px', height: '60%', backgroundColor: '#ccc' }} />
+
+                                            {/* Categories dropdown button */}
+                                            <Button color="inherit" sx={{ '@media (max-width:1021px)': { display: 'none' }, position: 'absolute', right: "8px", top: "50%", transform: "translateY(-50%)", textTransform: 'none', fontSize: "0.9rem", minWidth: '130px', height: "32px", padding: "4px 8px", display: "flex", alignItems: 'center', gap: '8px' }}
+                                                onClick={handleClick}
+                                                aria-controls={open ? 'categories-menu' : undefined}
+                                                aria-haspopup="true"
+                                                aria-expanded={open ? 'true' : undefined}
+                                            >
+                                                <Typography variant="body2" sx={{ fontSize: "0.85rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: displaySelectedCategory() === "All Categories" ? "grey.500" : "text.primary", flex: 1 }}>
+                                                    {displaySelectedCategory()}
+                                                </Typography>
+                                                <img src={dropdown} alt="dropdown icon" style={{ width: "15px", marginLeft: "10px", flexShrink: "0" }} />
+                                            </Button>
+                                            <Menu id="categories-menu" anchorEl={anchorEl} open={open} onClose={handleClose} MenuListProps={{ 'aria-labelledby': 'categories-button' }} sx={{ '& .MuiPaper-root': { borderRadius: '10px', marginTop: '5px', boxShadow: "none", border: "1px solid darkgrey", backgroundColor: "#F5F5F5" } }}>
+                                                {categories.map((category) => (
+                                                    <MenuItem
+                                                        key={category.category_id || 'all-categories'}
+                                                        onClick={() => handleCategorySelect(category)}
+                                                        sx={{
+                                                            fontSize: '0.9rem',
+                                                            color: category.name === "All Categories" ? 'grey.500' : 'text.primary',
+                                                            '&:hover': { backgroundColor: "lightgrey" }
                                                         }}
                                                     >
-                                                        {sub ? sub.subcategoryName : ""}
-                                                    </TableCell>
-                                                );
-                                            })}
+                                                        {category.name || "Invalid Category"}
+                                                    </MenuItem>
+                                                ))}
+                                            </Menu>
+                                        </Box>
+
+                                        <Button
+                                            type="submit"
+                                            variant="contained"
+                                            sx={{ width: "12%", marginX: "10px", backgroundColor: "#00B2C9", border: "1px solid #00B2C9", textTransform: "none", borderRadius: "20px" }}>
+                                            Search
+                                        </Button>
+                                    </Box>
+                                </Form>
+
+                                {isMobile && isSticky && (
+                                    <Button
+                                        color="inherit"
+                                        onClick={() => setOpenTable(!openTable)}
+                                        sx={{
+                                            display: { xs: 'flex', md: 'none' }, // fallback
+                                            '@media (max-width:1022px)': {
+                                                display: 'flex',
+                                            },
+                                            '@media (min-width:1023px)': {
+                                                display: 'none',
+                                            },
+                                            width: '92%',
+                                            marginTop: 1,
+                                            marginBottom: 0,
+                                            alignSelf: 'center',
+                                            textAlign: 'center',
+                                            backgroundColor: openTable ? '#ffffff' : 'transparent',
+                                            textTransform: 'none',
+                                            borderRadius: '20px',
+                                            fontSize: '1.1rem',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            gap: 1, // space between icon and text
+                                        }}
+                                    >
+                                        <img
+                                            src={boxes}
+                                            alt="icon"
+                                            style={{ width: "20px", height: "20px" }}
+                                        />
+                                        Categories
+                                    </Button>
+                                )}
+                            </>
+                        )}
+                    </Formik>
+
+                    {/* Categories-subcategories dropdown */}
+                    <Box sx={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 1000, backgroundColor: "#F2F2F2", borderRadius: "0 0 8px 8px", boxShadow: openTable ? "0 4px 8px rgba(0,0,0,0.1)" : "none", overflow: "hidden" }}>
+                        <Collapse in={openTable}>
+                            <TableContainer component={Paper} elevation={0} sx={{ maxWidth: "100%", overflowX: "auto", backgroundColor: "#F2F2F2", mx: "auto" }}>
+                                <Table size="small">
+                                    <TableHead>
+                                        <TableRow>
+                                            {columns.map((col, index) => (
+                                                <TableCell
+                                                    key={index}
+                                                    onClick={() => handleTableCategoryClick(col.categoryName)}
+                                                    sx={{
+                                                        fontWeight: "bold",
+                                                        fontSize: "0.8rem",
+                                                        borderBottom: "none",
+                                                        cursor: "pointer",
+                                                        '&:hover': { color: "#29B574" }
+                                                    }}
+                                                >
+                                                    {col.categoryName}
+                                                </TableCell>
+                                            ))}
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Collapse>
+                                    </TableHead>
+                                    <TableBody>
+                                        {Array.from({ length: maxRows }).map((_, rowIndex) => (
+                                            <TableRow key={rowIndex}>
+                                                {columns.map((col, colIndex) => {
+                                                    const sub = col.subcategories[rowIndex];
+                                                    return (
+                                                        <TableCell
+                                                            key={colIndex}
+                                                            onClick={() => sub && handleSubcategoryClick(sub)}
+                                                            sx={{
+                                                                fontSize: "0.7rem",
+                                                                paddingY: "0.125rem",
+                                                                borderBottom: "none",
+                                                                cursor: sub ? "pointer" : "default",
+                                                                '&:hover': sub ? { color: "#29B574" } : {}
+                                                            }}
+                                                        >
+                                                            {sub ? sub.subcategoryName : ""}
+                                                        </TableCell>
+                                                    );
+                                                })}
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </Collapse>
+                    </Box>
                 </Box>
             </Box>
-        </Box>
+
+            {isMobile && !isSticky && (
+                <Button
+                    color="inherit"
+                    onClick={() => setOpenTable(!openTable)}
+                    sx={{
+                        display: { xs: 'flex', md: 'none' }, // fallback
+                        '@media (max-width:1022px)': {
+                            display: 'flex',
+                        },
+                        '@media (min-width:1023px)': {
+                            display: 'none',
+                        },
+                        width: '92%',
+                        marginTop: 3,
+                        backgroundColor: "#F2F2F2",
+                        marginBottom: 0,
+                        alignSelf: 'center',
+                        textAlign: 'center',
+                        textTransform: 'none',
+                        borderRadius: '20px',
+                        fontSize: '1.1rem',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: 1, // space between icon and text
+                    }}
+                >
+                    <img
+                        src={boxes}
+                        alt="icon"
+                        style={{ width: "20px", height: "20px" }}
+                    />
+                    Categories
+                </Button>
+            )}
+        </>
     );
 };
 
