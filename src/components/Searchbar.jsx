@@ -11,6 +11,7 @@ import * as Yup from "yup";
 const Searchbar = () => {
     const tableRef = useRef(null);
     const containerRef = useRef(null);
+    const bottomButtonRef = useRef(null);
     const { isAuthenticated } = useAuth();
     const { selectedCategory, selectedSubcategory, setCategoryOnly, setCategoryAndSubcategory } = useCategory();
 
@@ -28,6 +29,7 @@ const Searchbar = () => {
     const [openTable, setOpenTable] = useState(false);
     const [columns, setColumns] = useState([]);
     const [maxRows, setMaxRows] = useState(0);
+    const [tablePosition, setTablePosition] = useState('searchbar'); // 'searchbar' or 'bottom'
 
     // Validation schema with Yup
     const validationSchema = Yup.object({
@@ -45,18 +47,35 @@ const Searchbar = () => {
         searchInput: ''
     };
 
-    // Sticky scroll handler
+    // Sticky scroll handler - UPDATED
     useEffect(() => {
         const handleScroll = () => {
             if (containerRef.current) {
                 const rect = containerRef.current.getBoundingClientRect();
-                setIsSticky(rect.top <= 0);
+                const newIsSticky = rect.top <= 0;
+                
+                // Handle table position transitions when sticky state changes
+                if (newIsSticky !== isSticky && openTable) {
+                    if (newIsSticky) {
+                        // Transitioning to sticky: move table from bottom to searchbar
+                        if (tablePosition === 'bottom') {
+                            setTablePosition('searchbar');
+                        }
+                    } else {
+                        // Transitioning to non-sticky: move table from searchbar to bottom
+                        if (tablePosition === 'searchbar') {
+                            setTablePosition('bottom');
+                        }
+                    }
+                }
+                
+                setIsSticky(newIsSticky);
             }
         };
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    }, [isSticky, openTable, tablePosition]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -144,7 +163,8 @@ const Searchbar = () => {
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (tableRef.current && !tableRef.current.contains(event.target)) {
+            if (tableRef.current && !tableRef.current.contains(event.target) &&
+                bottomButtonRef.current && !bottomButtonRef.current.contains(event.target)) {
                 setOpenTable(false);
             }
         }
@@ -207,6 +227,17 @@ const Searchbar = () => {
         }
     };
 
+    // Modified handlers for different button positions
+    const handleSearchbarCategoriesClick = () => {
+        setTablePosition('searchbar');
+        setOpenTable(!openTable);
+    };
+
+    const handleBottomCategoriesClick = () => {
+        setTablePosition('bottom');
+        setOpenTable(!openTable);
+    };
+
     // Helper to display the current selection
     const displaySelectedCategory = () => {
         if (selectedSubcategory && selectedCategory) {
@@ -248,6 +279,71 @@ const Searchbar = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    // Categories table component
+    const CategoriesTable = ({ isBottom = false }) => (
+        <Box sx={{ 
+            position: "absolute", 
+            top: "100%", 
+            left: 0, 
+            right: 0, 
+            zIndex: 1000, 
+            backgroundColor: "#F2F2F2", 
+            borderRadius: "0 0 8px 8px", 
+            boxShadow: openTable ? "0 4px 8px rgba(0,0,0,0.1)" : "none", 
+            overflow: "hidden" 
+        }}>
+            <Collapse in={openTable && ((isBottom && tablePosition === 'bottom') || (!isBottom && tablePosition === 'searchbar'))}>
+                <TableContainer component={Paper} elevation={0} sx={{ maxWidth: "100%", overflowX: "auto", backgroundColor: "#F2F2F2", mx: "auto" }}>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                {columns.map((col, index) => (
+                                    <TableCell
+                                        key={index}
+                                        onClick={() => handleTableCategoryClick(col.categoryName)}
+                                        sx={{
+                                            fontWeight: "bold",
+                                            fontSize: "0.8rem",
+                                            borderBottom: "none",
+                                            cursor: "pointer",
+                                            '&:hover': { color: "#29B574" }
+                                        }}
+                                    >
+                                        {col.categoryName}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {Array.from({ length: maxRows }).map((_, rowIndex) => (
+                                <TableRow key={rowIndex}>
+                                    {columns.map((col, colIndex) => {
+                                        const sub = col.subcategories[rowIndex];
+                                        return (
+                                            <TableCell
+                                                key={colIndex}
+                                                onClick={() => sub && handleSubcategoryClick(sub)}
+                                                sx={{
+                                                    fontSize: "0.7rem",
+                                                    paddingY: "0.125rem",
+                                                    borderBottom: "none",
+                                                    cursor: sub ? "pointer" : "default",
+                                                    '&:hover': sub ? { color: "#29B574" } : {}
+                                                }}
+                                            >
+                                                {sub ? sub.subcategoryName : ""}
+                                            </TableCell>
+                                        );
+                                    })}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Collapse>
+        </Box>
+    );
+
 
     return (
         <>
@@ -273,7 +369,7 @@ const Searchbar = () => {
                             <>
                                 <Form>
                                     <Box display="flex" >
-                                        <Button color="inherit" onClick={() => setOpenTable(!openTable)} sx={{ display: { xs: 'none', md: 'flex' }, '@media (max-width:1022px)': { display: 'none' }, backgroundColor: openTable ? '#ffffff' : 'transparent', marginX: "15px", textTransform: 'none', borderRadius: "20px", fontSize: "1.1rem" }}>
+                                        <Button color="inherit" onClick={handleSearchbarCategoriesClick} sx={{ display: { xs: 'none', md: 'flex' }, '@media (max-width:1022px)': { display: 'none' }, backgroundColor: openTable && tablePosition === 'searchbar' ? '#ffffff' : 'transparent', marginX: "15px", textTransform: 'none', borderRadius: "20px", fontSize: "1.1rem" }}>
                                             <img src={boxes} alt="icon" style={{ width: "20px", marginRight: "5px" }} />
                                             Categories
                                         </Button>
@@ -361,7 +457,7 @@ const Searchbar = () => {
                                 {isMobile && isSticky && (
                                     <Button
                                         color="inherit"
-                                        onClick={() => setOpenTable(!openTable)}
+                                        onClick={handleSearchbarCategoriesClick}
                                         sx={{
                                             display: { xs: 'flex', md: 'none' }, // fallback
                                             '@media (max-width:1022px)': {
@@ -375,7 +471,7 @@ const Searchbar = () => {
                                             marginBottom: 0,
                                             alignSelf: 'center',
                                             textAlign: 'center',
-                                            backgroundColor: openTable ? '#ffffff' : 'transparent',
+                                            backgroundColor: openTable && tablePosition === 'searchbar' ? '#ffffff' : 'transparent',
                                             textTransform: 'none',
                                             borderRadius: '20px',
                                             fontSize: '1.1rem',
@@ -396,94 +492,62 @@ const Searchbar = () => {
                         )}
                     </Formik>
 
-                    {/* Categories-subcategories dropdown */}
-                    <Box sx={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 1000, backgroundColor: "#F2F2F2", borderRadius: "0 0 8px 8px", boxShadow: openTable ? "0 4px 8px rgba(0,0,0,0.1)" : "none", overflow: "hidden" }}>
-                        <Collapse in={openTable}>
-                            <TableContainer component={Paper} elevation={0} sx={{ maxWidth: "100%", overflowX: "auto", backgroundColor: "#F2F2F2", mx: "auto" }}>
-                                <Table size="small">
-                                    <TableHead>
-                                        <TableRow>
-                                            {columns.map((col, index) => (
-                                                <TableCell
-                                                    key={index}
-                                                    onClick={() => handleTableCategoryClick(col.categoryName)}
-                                                    sx={{
-                                                        fontWeight: "bold",
-                                                        fontSize: "0.8rem",
-                                                        borderBottom: "none",
-                                                        cursor: "pointer",
-                                                        '&:hover': { color: "#29B574" }
-                                                    }}
-                                                >
-                                                    {col.categoryName}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {Array.from({ length: maxRows }).map((_, rowIndex) => (
-                                            <TableRow key={rowIndex}>
-                                                {columns.map((col, colIndex) => {
-                                                    const sub = col.subcategories[rowIndex];
-                                                    return (
-                                                        <TableCell
-                                                            key={colIndex}
-                                                            onClick={() => sub && handleSubcategoryClick(sub)}
-                                                            sx={{
-                                                                fontSize: "0.7rem",
-                                                                paddingY: "0.125rem",
-                                                                borderBottom: "none",
-                                                                cursor: sub ? "pointer" : "default",
-                                                                '&:hover': sub ? { color: "#29B574" } : {}
-                                                            }}
-                                                        >
-                                                            {sub ? sub.subcategoryName : ""}
-                                                        </TableCell>
-                                                    );
-                                                })}
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </Collapse>
-                    </Box>
+                    {/* Categories-subcategories dropdown for searchbar */}
+                    <CategoriesTable isBottom={false} />
                 </Box>
             </Box>
 
             {isMobile && !isSticky && (
-                <Button
-                    color="inherit"
-                    onClick={() => setOpenTable(!openTable)}
-                    sx={{
-                        display: { xs: 'flex', md: 'none' }, // fallback
-                        '@media (max-width:1022px)': {
-                            display: 'flex',
-                        },
-                        '@media (min-width:1023px)': {
-                            display: 'none',
-                        },
+                <Box sx={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                        ref={bottomButtonRef}
+                        color="inherit"
+                        onClick={handleBottomCategoriesClick}
+                        sx={{
+                            display: { xs: 'flex', md: 'none' }, // fallback
+                            '@media (max-width:1022px)': {
+                                display: 'flex',
+                            },
+                            '@media (min-width:1023px)': {
+                                display: 'none',
+                            },
+                            width: '90%',
+                            marginTop: 3,
+                            border: "4px solid #F2F2F2",
+                            backgroundColor: openTable && tablePosition === 'bottom' ? '#ffffff' : '#F2F2F2',
+                            marginBottom: 0,
+                            alignSelf: 'center',
+                            textAlign: 'center',
+                            textTransform: 'none',
+                            borderRadius: '30px',
+                            fontSize: '1.1rem',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: 1, // space between icon and text
+                        }}
+                    >
+                        <img
+                            src={boxes}
+                            alt="icon"
+                            style={{ width: "20px", height: "20px" }}
+                        />
+                        Categories
+                    </Button>
+                    
+                    {/* Categories-subcategories dropdown for bottom button */}
+                    <Box sx={{ 
+                        position: "absolute", 
+                        top: "100%", 
+                        left: 0, 
+                        right: 0, 
+                        zIndex: 1000,
                         width: '92%',
-                        marginTop: 3,
-                        backgroundColor: "#F2F2F2",
-                        marginBottom: 0,
                         alignSelf: 'center',
-                        textAlign: 'center',
-                        textTransform: 'none',
-                        borderRadius: '20px',
-                        fontSize: '1.1rem',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: 1, // space between icon and text
-                    }}
-                >
-                    <img
-                        src={boxes}
-                        alt="icon"
-                        style={{ width: "20px", height: "20px" }}
-                    />
-                    Categories
-                </Button>
+                        marginX: 'auto'
+                    }}>
+                        <CategoriesTable isBottom={true} />
+                    </Box>
+                </Box>
             )}
         </>
     );
