@@ -11,7 +11,7 @@ const ProductPageLayout = ({ onProductClick }) => {
     };
 
     return (
-        <Box display="flex" sx={{ width: "75%" }}>
+        <Box display="flex" sx={{ width: { xs: "91%", md: "91%", lg: "77%" }, mx: "auto" }}>
             <Box width="320px" p={2} sx={{
                 border: '1px solid #ccc', borderRadius: 2, padding: 2, marginTop: 2,
                 height: "fit-content"
