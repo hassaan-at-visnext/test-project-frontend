@@ -47,7 +47,7 @@ const Searchbar = () => {
         searchInput: ''
     };
 
-    // Sticky scroll handler - UPDATED
+    // Sticky scroll handler - UPDATED to maintain table state in desktop mode
     useEffect(() => {
         const handleScroll = () => {
             if (containerRef.current) {
@@ -62,9 +62,15 @@ const Searchbar = () => {
                             setTablePosition('searchbar');
                         }
                     } else {
-                        // Transitioning to non-sticky: move table from searchbar to bottom
+                        // Transitioning to non-sticky: In desktop mode, keep table open at searchbar
+                        // In mobile mode, move table from searchbar to bottom
                         if (tablePosition === 'searchbar') {
-                            setTablePosition('bottom');
+                            // Check if we're in mobile mode
+                            const currentIsMobile = window.innerWidth < 1022;
+                            if (currentIsMobile) {
+                                setTablePosition('bottom');
+                            }
+                            // In desktop mode (!isMobile), keep tablePosition as 'searchbar' - no change needed
                         }
                     }
                 }
