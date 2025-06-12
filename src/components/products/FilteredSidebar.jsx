@@ -113,8 +113,8 @@ const FilteredSidebar = () => {
         loc.toLowerCase().includes(searchLocation.toLowerCase())
     );
     const displayedLocations = showAllLocations ? filteredLocations : filteredLocations.slice(0, 6);
-    
-    const filteredSupplierCerts = supplierCertificaitons.filter(cert => 
+
+    const filteredSupplierCerts = supplierCertificaitons.filter(cert =>
         cert.toLowerCase().includes(searchSupplierCerts.toLowerCase())
     );
 
@@ -166,7 +166,7 @@ const FilteredSidebar = () => {
     // Handle price changes with debouncing
     const handlePriceChange = (field, value, setFieldValue) => {
         setFieldValue(field, value);
-        
+
         // Debounce the filter update
         const timeoutId = setTimeout(() => {
             updateFilters({ [field]: value || 0 });
@@ -178,7 +178,7 @@ const FilteredSidebar = () => {
     // Handle MOQ changes with debouncing
     const handleMOQChange = (value, setFieldValue) => {
         setFieldValue('moq', value);
-        
+
         // Debounce the filter update
         const timeoutId = setTimeout(() => {
             updateFilters({ moq: value });
@@ -370,7 +370,7 @@ const FilteredSidebar = () => {
         <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-            onSubmit={() => {}} // Not needed as we handle changes in real-time
+            onSubmit={() => { }} // Not needed as we handle changes in real-time
             enableReinitialize
         >
             {({ values, errors, touched, setFieldValue }) => (
@@ -395,14 +395,14 @@ const FilteredSidebar = () => {
                                         }}
                                         error={meta.touched && !!meta.error}
                                         helperText={meta.touched && meta.error}
-                                        sx={{ 
-                                            "& .MuiOutlinedInput-root": { 
-                                                borderRadius: "20px", 
-                                                backgroundColor: "#F2F2F2", 
-                                                "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, 
-                                                "&:hover fieldset": { border: "1px solid darkgrey" }, 
-                                                "&.Mui-focused fieldset": { border: "1px solid darkgrey" } 
-                                            } 
+                                        sx={{
+                                            "& .MuiOutlinedInput-root": {
+                                                borderRadius: "20px",
+                                                backgroundColor: "#F2F2F2",
+                                                "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" },
+                                                "&:hover fieldset": { border: "1px solid darkgrey" },
+                                                "&.Mui-focused fieldset": { border: "1px solid darkgrey" }
+                                            }
                                         }}
                                         InputProps={{
                                             endAdornment: (
@@ -442,16 +442,16 @@ const FilteredSidebar = () => {
                                         placeholder="from"
                                         size="small"
                                         error={meta.touched && !!meta.error}
-                                        sx={{ 
-                                            width: "45%", 
-                                            borderRadius: "50px", 
-                                            backgroundColor: "#F2F2F2", 
-                                            '& .MuiOutlinedInput-root': { 
-                                                borderRadius: "20px", 
-                                                "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, 
-                                                "&:hover fieldset": { border: "1px solid darkgrey" }, 
-                                                "&.Mui-focused fieldset": { border: "1px solid darkgrey" } 
-                                            } 
+                                        sx={{
+                                            width: "45%",
+                                            borderRadius: "50px",
+                                            backgroundColor: "#F2F2F2",
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: "20px",
+                                                "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" },
+                                                "&:hover fieldset": { border: "1px solid darkgrey" },
+                                                "&.Mui-focused fieldset": { border: "1px solid darkgrey" }
+                                            }
                                         }}
                                         inputProps={{ inputMode: 'numeric', pattern: '\\d*' }}
                                         InputProps={{ endAdornment: <InputAdornment position="end">$</InputAdornment> }}
@@ -475,16 +475,16 @@ const FilteredSidebar = () => {
                                         placeholder="to"
                                         size="small"
                                         error={meta.touched && !!meta.error}
-                                        sx={{ 
-                                            width: "45%", 
-                                            borderRadius: "50px", 
-                                            backgroundColor: "#F2F2F2", 
-                                            '& .MuiOutlinedInput-root': { 
-                                                borderRadius: "50px", 
-                                                "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, 
-                                                "&:hover fieldset": { border: "1px solid darkgrey" }, 
-                                                "&.Mui-focused fieldset": { border: "1px solid darkgrey" } 
-                                            } 
+                                        sx={{
+                                            width: "45%",
+                                            borderRadius: "50px",
+                                            backgroundColor: "#F2F2F2",
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: "50px",
+                                                "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" },
+                                                "&:hover fieldset": { border: "1px solid darkgrey" },
+                                                "&.Mui-focused fieldset": { border: "1px solid darkgrey" }
+                                            }
                                         }}
                                         inputProps={{ inputMode: 'numeric', pattern: '\\d*' }}
                                         InputProps={{ endAdornment: <InputAdornment position="end">$</InputAdornment> }}
@@ -525,17 +525,17 @@ const FilteredSidebar = () => {
                                     placeholder="less than"
                                     error={meta.touched && !!meta.error}
                                     helperText={meta.touched && meta.error}
-                                    sx={{ 
-                                        width: '100%', 
-                                        borderRadius: "50px", 
-                                        backgroundColor: "#F2F2F2", 
-                                        '& .MuiOutlinedInput-root': { 
-                                            borderRadius: "50px", 
-                                            backgroundColor: "#F2F2F2", 
-                                            "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, 
-                                            "&:hover fieldset": { border: "1px solid darkgrey" }, 
-                                            "&.Mui-focused fieldset": { border: "1px solid darkgrey" } 
-                                        } 
+                                    sx={{
+                                        width: '100%',
+                                        borderRadius: "50px",
+                                        backgroundColor: "#F2F2F2",
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: "50px",
+                                            backgroundColor: "#F2F2F2",
+                                            "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" },
+                                            "&:hover fieldset": { border: "1px solid darkgrey" },
+                                            "&.Mui-focused fieldset": { border: "1px solid darkgrey" }
+                                        }
                                     }}
                                     inputProps={{ style: { textAlign: 'center' }, inputMode: 'numeric', pattern: '\\d*' }}
                                 />
@@ -564,14 +564,14 @@ const FilteredSidebar = () => {
                                     }}
                                     error={meta.touched && !!meta.error}
                                     helperText={meta.touched && meta.error}
-                                    sx={{ 
-                                        "& .MuiOutlinedInput-root": { 
-                                            borderRadius: "20px", 
-                                            backgroundColor: "#F2F2F2", 
-                                            "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, 
-                                            "&:hover fieldset": { border: "1px solid darkgrey" }, 
-                                            "&.Mui-focused fieldset": { border: "1px solid darkgrey" } 
-                                        } 
+                                    sx={{
+                                        "& .MuiOutlinedInput-root": {
+                                            borderRadius: "20px",
+                                            backgroundColor: "#F2F2F2",
+                                            "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" },
+                                            "&:hover fieldset": { border: "1px solid darkgrey" },
+                                            "&.Mui-focused fieldset": { border: "1px solid darkgrey" }
+                                        }
                                     }}
                                     InputProps={{
                                         endAdornment: (
@@ -586,11 +586,11 @@ const FilteredSidebar = () => {
                                 />
                             )}
                         </Field>
-                        
+
                         <FormGroup sx={{ mt: 2 }}>
                             {displayedCerts.map((cert) => (
-                                <FormControlLabel 
-                                    key={cert} 
+                                <FormControlLabel
+                                    key={cert}
                                     control={
                                         <Checkbox
                                             name={cert}
@@ -605,10 +605,10 @@ const FilteredSidebar = () => {
                         </FormGroup>
 
                         {filteredCerts.length > 6 && (
-                            <Typography 
-                                variant="body2" 
-                                style={{ color: "#29B574" }} 
-                                onClick={() => setShowAllCerts((prev) => !prev)} 
+                            <Typography
+                                variant="body2"
+                                style={{ color: "#29B574" }}
+                                onClick={() => setShowAllCerts((prev) => !prev)}
                                 sx={{ mt: 1, color: "primary.main", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}
                             >
                                 {showAllCerts ? "Show Less" : `Show All (${filteredCerts.length})`}
@@ -635,14 +635,14 @@ const FilteredSidebar = () => {
                                     }}
                                     error={meta.touched && !!meta.error}
                                     helperText={meta.touched && meta.error}
-                                    sx={{ 
-                                        "& .MuiOutlinedInput-root": { 
-                                            borderRadius: "20px", 
-                                            backgroundColor: "#F2F2F2", 
-                                            "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, 
-                                            "&:hover fieldset": { border: "1px solid darkgrey" }, 
-                                            "&.Mui-focused fieldset": { border: "1px solid darkgrey" } 
-                                        } 
+                                    sx={{
+                                        "& .MuiOutlinedInput-root": {
+                                            borderRadius: "20px",
+                                            backgroundColor: "#F2F2F2",
+                                            "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" },
+                                            "&:hover fieldset": { border: "1px solid darkgrey" },
+                                            "&.Mui-focused fieldset": { border: "1px solid darkgrey" }
+                                        }
                                     }}
                                     InputProps={{
                                         endAdornment: (
@@ -657,11 +657,11 @@ const FilteredSidebar = () => {
                                 />
                             )}
                         </Field>
-                        
+
                         <FormGroup sx={{ mt: 2 }}>
                             {filteredSupplierCerts.map(cert => (
-                                <FormControlLabel 
-                                    key={cert} 
+                                <FormControlLabel
+                                    key={cert}
                                     control={
                                         <Checkbox
                                             name={cert}
@@ -697,14 +697,14 @@ const FilteredSidebar = () => {
                                     }}
                                     error={meta.touched && !!meta.error}
                                     helperText={meta.touched && meta.error}
-                                    sx={{ 
-                                        "& .MuiOutlinedInput-root": { 
-                                            borderRadius: "20px", 
-                                            backgroundColor: "#F2F2F2", 
-                                            "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" }, 
-                                            "&:hover fieldset": { border: "1px solid darkgrey" }, 
-                                            "&.Mui-focused fieldset": { border: "1px solid darkgrey" } 
-                                        } 
+                                    sx={{
+                                        "& .MuiOutlinedInput-root": {
+                                            borderRadius: "20px",
+                                            backgroundColor: "#F2F2F2",
+                                            "& fieldset": { borderRadius: "20px", border: "1px solid darkgrey" },
+                                            "&:hover fieldset": { border: "1px solid darkgrey" },
+                                            "&.Mui-focused fieldset": { border: "1px solid darkgrey" }
+                                        }
                                     }}
                                     InputProps={{
                                         endAdornment: (
@@ -719,7 +719,7 @@ const FilteredSidebar = () => {
                                 />
                             )}
                         </Field>
-                        
+
                         <FormGroup sx={{ mt: 2 }}>
                             {displayedLocations.map((loc) => (
                                 <FormControlLabel
@@ -736,7 +736,7 @@ const FilteredSidebar = () => {
                                 />
                             ))}
                         </FormGroup>
-                        
+
                         {filteredLocations.length > 6 && (
                             <Typography
                                 variant="body2"
