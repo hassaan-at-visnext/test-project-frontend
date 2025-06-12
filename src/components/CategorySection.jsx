@@ -68,7 +68,7 @@ const CategorySection = () => {
                     mt: isAbove1024 ? 0 : 2,
                 }}
             >
-                <Typography sx={{ color: "white" }}>
+                <Typography sx={{ color: "white", textAlign: "center" }}>
                     Placing bulk orders on BuyHive is Safe & easy
                 </Typography>
                 <Typography
