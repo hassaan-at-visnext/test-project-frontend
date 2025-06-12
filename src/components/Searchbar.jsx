@@ -274,10 +274,32 @@ const Searchbar = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1022);
 
     useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 1022);
+        const handleResize = () => {
+            const newIsMobile = window.innerWidth < 1022;
+            
+            // Handle table position transitions during resize
+            if (openTable) {
+                // Mobile to Desktop transition
+                if (isMobile && !newIsMobile && tablePosition === 'bottom') {
+                    setTablePosition('searchbar');
+                }
+                // Desktop to Mobile transition
+                else if (!isMobile && newIsMobile && tablePosition === 'searchbar') {
+                    // If searchbar is sticky, keep table under sticky searchbar
+                    // If searchbar is non-sticky, move table to bottom button
+                    if (!isSticky) {
+                        setTablePosition('bottom');
+                    }
+                    // If sticky, tablePosition stays 'searchbar' (no change needed)
+                }
+            }
+            
+            setIsMobile(newIsMobile);
+        };
+        
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    }, [isMobile, openTable, tablePosition, isSticky]);
 
     // Categories table component
     const CategoriesTable = ({ isBottom = false }) => (
@@ -359,7 +381,7 @@ const Searchbar = () => {
                     justifyContent: 'center',
                 }}
             >
-                <Box ref={tableRef} display="flex" flexDirection="column" marginTop={0} p={2} borderRadius={2} sx={{ backgroundColor: "#F2F2F2", border: "1px solid #F2F2F2", width: { xs: "95%", md: "92%", lg: "77%" }, mx: "auto", position: "relative", zIndex: 1000, pb: isSticky ? 0 : 2, }}>
+                <Box ref={tableRef} display="flex" flexDirection="column" marginTop={0} p={2} borderRadius={2} sx={{ backgroundColor: "#F2F2F2", border: "1px solid #F2F2F2", width: { xs: "95%", md: "92%", lg: "77%" }, mx: "auto", position: "relative", zIndex: 1000, pb: isSticky ? (isMobile ? 0 : 2) : 2, }}>
                     <Formik
                         initialValues={initialValues}
                         validationSchema={validationSchema}
