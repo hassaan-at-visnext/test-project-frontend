@@ -1,25 +1,31 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useCategory } from "../context/CategoryContext";
 
 const CategorySection = () => {
     const { selectedCategory, productsNumber } = useCategory();
+    const theme = useTheme();
+    
+    // Custom breakpoint at 1024px
+    const isAbove1024 = useMediaQuery('(min-width:1022px)');
 
     return (
         <Box
             display="flex"
-            alignItems="flex-start"
+            flexDirection={isAbove1024 ? "row" : "column"}
+            alignItems={isAbove1024 ? "flex-start" : "stretch"}
             sx={{
-                width: "75%",
+                width: { xs: "91%", md: "91%", lg: "77%" },
+                mx: "auto",
                 mt: 4,
                 gap: 2,
             }}
         >
+            {/* Category Name */}
             <Box
                 sx={{
-                    width: "320px",
-                    height: "fit-content",
+                    width: isAbove1024 ? "320px" : "100%",
                     flexShrink: 0,
-                    mt: 2
+                    mt: 2,
                 }}
             >
                 <Typography fontSize={18} display="inline" mr={1}>
@@ -30,14 +36,15 @@ const CategorySection = () => {
                 </Typography>
             </Box>
 
+            {/* Breadcrumb */}
             <Box
                 sx={{
                     flex: 1,
-                    mt: 0,
                     pl: 1,
                     display: "flex",
                     alignItems: "center",
-                    mt: 2
+                    mt: 2,
+                    width: isAbove1024 ? "auto" : "100%",
                 }}
             >
                 <Typography display="inline" sx={{ color: "#7F8CAA", mr: 1 }}>
@@ -48,6 +55,7 @@ const CategorySection = () => {
                 </Typography>
             </Box>
 
+            {/* Info Box */}
             <Box
                 sx={{
                     background: "linear-gradient(to right,rgb(4, 221, 167),rgb(0, 121, 201))",
@@ -55,7 +63,9 @@ const CategorySection = () => {
                     px: 7,
                     borderRadius: 3,
                     flexShrink: 0,
-                    minWidth: "fit-content"
+                    minWidth: "fit-content",
+                    width: isAbove1024 ? "auto" : "100%",
+                    mt: isAbove1024 ? 0 : 2,
                 }}
             >
                 <Typography sx={{ color: "white" }}>
@@ -66,7 +76,7 @@ const CategorySection = () => {
                     sx={{
                         fontWeight: "bold",
                         textAlign: "center",
-                        color: "white"
+                        color: "white",
                     }}
                 >
                     Click to learn how it works!
