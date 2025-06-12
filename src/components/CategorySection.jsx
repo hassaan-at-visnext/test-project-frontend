@@ -1,18 +1,24 @@
-import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Typography, useMediaQuery, Button, Collapse } from "@mui/material";
+import { useState } from "react";
 import { useCategory } from "../context/CategoryContext";
+import FilteredSidebar from "./products/FilteredSidebar";
 
 const CategorySection = () => {
     const { selectedCategory, productsNumber } = useCategory();
-    const theme = useTheme();
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
     
-    // Custom breakpoint at 1024px
-    const isAbove1024 = useMediaQuery('(min-width:1022px)');
+    // Custom breakpoint at 1022px
+    const isAbove1022 = useMediaQuery('(min-width:1022px)');
+
+    const handleToggleFilters = () => {
+        setShowMobileFilters(!showMobileFilters);
+    };
 
     return (
         <Box
             display="flex"
-            flexDirection={isAbove1024 ? "row" : "column"}
-            alignItems={isAbove1024 ? "flex-start" : "stretch"}
+            flexDirection={isAbove1022 ? "row" : "column"}
+            alignItems={isAbove1022 ? "flex-start" : "stretch"}
             sx={{
                 width: { xs: "91%", md: "91%", lg: "77%" },
                 mx: "auto",
@@ -23,7 +29,7 @@ const CategorySection = () => {
             {/* Category Name */}
             <Box
                 sx={{
-                    width: isAbove1024 ? "320px" : "100%",
+                    width: isAbove1022 ? "320px" : "100%",
                     flexShrink: 0,
                     mt: 2,
                 }}
@@ -36,6 +42,47 @@ const CategorySection = () => {
                 </Typography>
             </Box>
 
+            {/* Show Filters Button - Only visible on mobile when filters are hidden */}
+            {!isAbove1022 && (
+                <Box sx={{ width: "100%", mt: 2 }}>
+                    <Button
+                        variant="outlined"
+                        fullWidth
+                        onClick={handleToggleFilters}
+                        sx={{
+                            border: "1px solid darkgrey",
+                            borderRadius: 10,
+                            py: 1.5,
+                            color: "text.primary",
+                            textTransform: "none",
+                            fontSize: "16px",
+                            fontWeight: "normal",
+                            "&:hover": {
+                                border: "1px solid darkgrey",
+                                backgroundColor: "rgba(0, 0, 0, 0.04)",
+                            },
+                        }}
+                    >
+                        {showMobileFilters ? "Close Filters" : "Show Filters"}
+                    </Button>
+                    
+                    {/* Mobile Filters Dropdown */}
+                    <Collapse in={showMobileFilters}>
+                        <Box
+                            sx={{
+                                mt: 2,
+                                border: "1px solid #ccc",
+                                borderRadius: 2,
+                                p: 2,
+                                backgroundColor: "white",
+                            }}
+                        >
+                            <FilteredSidebar />
+                        </Box>
+                    </Collapse>
+                </Box>
+            )}
+
             {/* Breadcrumb */}
             <Box
                 sx={{
@@ -44,7 +91,7 @@ const CategorySection = () => {
                     display: "flex",
                     alignItems: "center",
                     mt: 2,
-                    width: isAbove1024 ? "auto" : "100%",
+                    width: isAbove1022 ? "auto" : "100%",
                 }}
             >
                 <Typography display="inline" sx={{ color: "#7F8CAA", mr: 1 }}>
@@ -64,8 +111,8 @@ const CategorySection = () => {
                     borderRadius: 3,
                     flexShrink: 0,
                     minWidth: "fit-content",
-                    width: isAbove1024 ? "auto" : "100%",
-                    mt: isAbove1024 ? 0 : 2,
+                    width: isAbove1022 ? "auto" : "100%",
+                    mt: isAbove1022 ? 0 : 2,
                 }}
             >
                 <Typography sx={{ color: "white", textAlign: "center" }}>
@@ -86,4 +133,4 @@ const CategorySection = () => {
     );
 };
 
-export default CategorySection;
+export default CategorySection; 
