@@ -432,7 +432,8 @@ const FilteredSidebar = () => {
                                 {({ field, meta }) => (
                                     <TextField
                                         {...field}
-                                        value={filters.minPrice || ''}
+                                        // value={filters.minPrice || ''}
+                                        value={filters.minPrice ?? ''}
                                         onChange={(e) => {
                                             const trimmedValue = e.target.value.trimStart();
                                             if (/^\d*$/.test(trimmedValue) || trimmedValue === '') {
