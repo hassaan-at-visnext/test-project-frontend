@@ -54,7 +54,7 @@ const Searchbar = () => {
             if (containerRef.current) {
                 const rect = containerRef.current.getBoundingClientRect();
                 const newIsSticky = rect.top <= 0;
-                
+
                 // Handle table position transitions when sticky state changes
                 if (newIsSticky !== isSticky && openTable) {
                     if (newIsSticky) {
@@ -75,7 +75,7 @@ const Searchbar = () => {
                         }
                     }
                 }
-                
+
                 setIsSticky(newIsSticky);
             }
         };
@@ -173,12 +173,12 @@ const Searchbar = () => {
         const handleClickOutside = (event) => {
             if (openTable) {
                 let clickedOutside = true;
-                
+
                 // Check if click is inside the button that triggered the table
                 if (bottomButtonRef.current && bottomButtonRef.current.contains(event.target)) {
                     clickedOutside = false;
                 }
-                
+
                 // Check based on table position
                 if (tablePosition === 'searchbar') {
                     if (tableRef.current && tableRef.current.contains(event.target)) {
@@ -189,13 +189,13 @@ const Searchbar = () => {
                         clickedOutside = false;
                     }
                 }
-                
+
                 if (clickedOutside) {
                     setOpenTable(false);
                 }
             }
         };
-        
+
         if (openTable) {
             document.addEventListener('mousedown', handleClickOutside);
         }
@@ -304,7 +304,7 @@ const Searchbar = () => {
     useEffect(() => {
         const handleResize = () => {
             const newIsMobile = window.innerWidth < 1022;
-            
+
             // Handle table position transitions during resize
             if (openTable) {
                 // Mobile to Desktop transition
@@ -321,35 +321,35 @@ const Searchbar = () => {
                     // If sticky, tablePosition stays 'searchbar' (no change needed)
                 }
             }
-            
+
             setIsMobile(newIsMobile);
         };
-        
+
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, [isMobile, openTable, tablePosition, isSticky]);
 
     // Categories table component
     const CategoriesTable = ({ isBottom = false }) => (
-        <Box sx={{ 
-            position: "absolute", 
-            top: "100%", 
-            left: 0, 
-            right: 0, 
-            zIndex: 1000, 
-            backgroundColor: "#F2F2F2", 
-            borderRadius: "0 0 8px 8px", 
-            boxShadow: openTable ? "0 4px 8px rgba(0,0,0,0.1)" : "none", 
-            overflow: "hidden" 
+        <Box sx={{
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            right: 0,
+            zIndex: 1000,
+            backgroundColor: "#F2F2F2",
+            borderRadius: "0 0 8px 8px",
+            boxShadow: openTable ? "0 4px 8px rgba(0,0,0,0.1)" : "none",
+            overflow: "hidden"
         }}>
             <Collapse in={openTable && ((isBottom && tablePosition === 'bottom') || (!isBottom && tablePosition === 'searchbar'))}>
-                <TableContainer 
-                    component={Paper} 
-                    elevation={0} 
-                    sx={{ 
-                        maxWidth: "100%", 
-                        overflowX: "auto", 
-                        backgroundColor: "#F2F2F2", 
+                <TableContainer
+                    component={Paper}
+                    elevation={0}
+                    sx={{
+                        maxWidth: "100%",
+                        overflowX: "auto",
+                        backgroundColor: "#F2F2F2",
                         mx: "auto",
                         // Ensure horizontal scrollbar is always visible when needed
                         '&::-webkit-scrollbar': {
@@ -622,15 +622,15 @@ const Searchbar = () => {
                         />
                         Categories
                     </Button>
-                    
+
                     {/* Categories-subcategories dropdown for bottom button - FIXED with separate ref */}
-                    <Box 
+                    <Box
                         ref={bottomTableRef}
-                        sx={{ 
-                            position: "absolute", 
-                            top: "100%", 
-                            left: 0, 
-                            right: 0, 
+                        sx={{
+                            position: "absolute",
+                            top: "100%",
+                            left: 0,
+                            right: 0,
                             zIndex: 1000,
                             width: '92%',
                             alignSelf: 'center',

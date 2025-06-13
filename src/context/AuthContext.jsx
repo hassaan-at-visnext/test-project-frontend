@@ -1,5 +1,5 @@
 import axios from "axios";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 
 const AuthContext = createContext();
 
@@ -45,8 +45,10 @@ export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [firstName, setFirstName] = useState('');
+    const initialized = useRef(false);
 
     useEffect(() => {
+        if (initialized.current) return; // Prevent re-initialization
         const token = localStorage.getItem('token');
         const storedFirstName = localStorage.getItem('firstName');
 
@@ -62,7 +64,7 @@ export const AuthProvider = ({ children }) => {
         }
         
         setIsLoading(false);
-
+        initialized.current = true;
         // Listen for logout events from axios interceptor
         const handleLogout = () => {
             setIsAuthenticated(false);
