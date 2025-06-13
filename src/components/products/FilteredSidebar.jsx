@@ -427,7 +427,7 @@ const FilteredSidebar = () => {
                         <Typography gutterBottom>
                             Price
                         </Typography>
-                        <Box display="flex" alignItems="center" gap={1}>
+                        <Box display="flex" alignItems="center" justifyContent="space-between" >
                             <Field name="minPrice">
                                 {({ field, meta }) => (
                                     <TextField
