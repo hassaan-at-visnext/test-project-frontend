@@ -763,7 +763,7 @@ const ProductTable = ({ onProductClick }) => {
 
       {/* Bottom Pagination */}
       {pagination.totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={4}>
+        <Box display="flex" justifyContent="right" mt={4}>
           <CustomPagination
             count={pagination.totalPages}
             page={currentPage}
