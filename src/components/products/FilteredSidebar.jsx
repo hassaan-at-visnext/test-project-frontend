@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState } from "react";
-import { useAuth, authAxios } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useCategory } from "../../context/CategoryContext";
 import { useFilter } from "../../context/FilterContext";
 import { Formik, Form, Field } from "formik";
@@ -81,16 +81,19 @@ const FilteredSidebar = () => {
 
     // Categories and Subcategories states start 
     const [searchTerm, setSearchTerm] = useState('');
-    const [allCategoriesData, setAllCategoiresData] = useState([]);
     const [filteredSubcategories, setFilteredSubcategories] = useState([]);
     const [showAll, setShowAll] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     // Categories and Subcategories states end
 
     // Context usage 
     const { isAuthenticated } = useAuth();
-    const { selectedCategory, setCategoryAndSubcategory } = useCategory();
+    const { 
+        selectedCategory, 
+        setCategoryAndSubcategory, 
+        allCategoriesData, 
+        categoriesLoading, 
+        categoriesError 
+    } = useCategory();
     const { filters, updateFilters } = useFilter();
 
     // Supplier Certifications States & Logic starts
@@ -186,37 +189,6 @@ const FilteredSidebar = () => {
 
         return () => clearTimeout(timeoutId);
     };
-
-    useEffect(() => {
-        const fetchCategoriesData = async () => {
-            setLoading(true);
-            setError(null);
-
-            try {
-                const API_URI = "http://localhost:5000/api/v1/categories-subcategories"
-                const response = await authAxios.get(API_URI);
-
-                const data = response.data;
-                if (data.success) {
-                    setAllCategoiresData(data.data);
-                } else {
-                    setError('Failed to fetch categories data');
-                }
-            } catch (err) {
-                if (err.response && (err.response.status === 401 || err.response.status === 409)) {
-                    return;
-                }
-                console.error("Error fetching categories-subcategories: ", err);
-                setError('Failed to fetch categories data');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        if (isAuthenticated) {
-            fetchCategoriesData();
-        }
-    }, [isAuthenticated]);
 
     // Reset Search when category changes
     useEffect(() => {
@@ -334,7 +306,7 @@ const FilteredSidebar = () => {
     };
 
     const renderCategoriesContent = () => {
-        if (loading) {
+        if (categoriesLoading) {
             return (
                 <Box display="flex" justifyContent="center" py={2}>
                     <CircularProgress size={24} />
@@ -342,10 +314,10 @@ const FilteredSidebar = () => {
             );
         }
 
-        if (error) {
+        if (categoriesError) {
             return (
                 <Alert severity="error" sx={{ mb: 2 }}>
-                    {error}
+                    {categoriesError}
                 </Alert>
             );
         }
