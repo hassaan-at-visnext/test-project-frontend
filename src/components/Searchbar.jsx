@@ -359,11 +359,12 @@ const Searchbar = () => {
                             backgroundColor: '#f1f1f1',
                         },
                         '&::-webkit-scrollbar-thumb': {
-                            backgroundColor: '#888',
+                            // backgroundColor: '#888',
+                            backgroundColor: '#198754',
                             borderRadius: '4px',
                         },
                         '&::-webkit-scrollbar-thumb:hover': {
-                            backgroundColor: '#555',
+                            backgroundColor: '#198754',
                         },
                     }}
                 >
