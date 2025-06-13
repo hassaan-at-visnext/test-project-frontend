@@ -94,11 +94,56 @@ const ProductTable = ({ onProductClick }) => {
     limit: 9
   });
 
+  // Categories cache state
+  const [categoriesCache, setCategoriesCache] = useState(null);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+
   const { selectedCategory, selectedSubcategory, setNumberOfProducts } = useCategory();
   const { filters } = useFilter();
 
   // API Base URL
   const API_BASE_URL = 'http://localhost:5000/api/v1';
+
+  // Fetch and cache categories
+  const fetchAndCacheCategories = async () => {
+    if (categoriesCache) {
+      return categoriesCache; // Return cached data if available
+    }
+
+    if (categoriesLoading) {
+      // If already loading, wait for it to complete
+      return new Promise((resolve) => {
+        const checkCache = () => {
+          if (categoriesCache) {
+            resolve(categoriesCache);
+          } else if (!categoriesLoading) {
+            resolve(null);
+          } else {
+            setTimeout(checkCache, 100);
+          }
+        };
+        checkCache();
+      });
+    }
+
+    setCategoriesLoading(true);
+    try {
+      const categoriesResponse = await authAxios.get(`${API_BASE_URL}/categories`);
+      
+      if (!categoriesResponse.data.success) {
+        throw new Error('Failed to fetch categories');
+      }
+
+      const categories = categoriesResponse.data.data;
+      setCategoriesCache(categories);
+      return categories;
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      throw err;
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
 
   // Update number of products for context
   useEffect(() => {
@@ -171,7 +216,6 @@ const ProductTable = ({ onProductClick }) => {
     return params.toString();
   };
 
-
   const isAllCategoriesSelected = () => {
     if (!selectedCategory) return false;
     return selectedCategory.category_id === null && selectedCategory.name === "All Categories";
@@ -179,13 +223,8 @@ const ProductTable = ({ onProductClick }) => {
 
   const getCategoryId = async (categoryName) => {
     try {
-      const categoriesResponse = await authAxios.get(`${API_BASE_URL}/categories`);
+      const categories = await fetchAndCacheCategories();
 
-      if (!categoriesResponse.data.success) {
-        throw new Error('Failed to fetch categories');
-      }
-
-      const categories = categoriesResponse.data.data;
       const category = categories.find(cat =>
         cat.name.toLowerCase().trim() === categoryName.toLowerCase().trim()
       );
@@ -277,9 +316,9 @@ const ProductTable = ({ onProductClick }) => {
 
       if (isAllCategoriesSelected()) {
         try {
-          const categoriesResponse = await authAxios.get(`${API_BASE_URL}/categories`);
-          if (categoriesResponse.data.success && categoriesResponse.data.data.length > 0) {
-            categoryId = categoriesResponse.data.data[0].category_id;
+          const categories = await fetchAndCacheCategories();
+          if (categories && categories.length > 0) {
+            categoryId = categories[0].category_id;
           } else {
             throw new Error('No categories available for search');
           }
