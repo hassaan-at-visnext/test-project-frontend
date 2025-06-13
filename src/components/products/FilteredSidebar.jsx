@@ -454,7 +454,7 @@ const FilteredSidebar = () => {
                                                 "&.Mui-focused fieldset": { border: "1px solid darkgrey" }
                                             }
                                         }}
-                                        inputProps={{ inputMode: 'numeric', pattern: '\\d*' }}
+                                        inputProps={{ inputMode: 'numeric', pattern: '\\d*', style: { textAlign: "center" } }}
                                         InputProps={{ endAdornment: <InputAdornment position="end">$</InputAdornment> }}
                                     />
                                 )}
@@ -487,7 +487,7 @@ const FilteredSidebar = () => {
                                                 "&.Mui-focused fieldset": { border: "1px solid darkgrey" }
                                             }
                                         }}
-                                        inputProps={{ inputMode: 'numeric', pattern: '\\d*' }}
+                                        inputProps={{ inputMode: 'numeric', pattern: '\\d*', style: { textAlign: "center" } }}
                                         InputProps={{ endAdornment: <InputAdornment position="end">$</InputAdornment> }}
                                     />
                                 )}
