@@ -12,6 +12,7 @@ const Searchbar = () => {
     const tableRef = useRef(null);
     const containerRef = useRef(null);
     const bottomButtonRef = useRef(null);
+    const bottomTableRef = useRef(null); // Add separate ref for bottom table
     const { isAuthenticated } = useAuth();
     const { selectedCategory, selectedSubcategory, setCategoryOnly, setCategoryAndSubcategory } = useCategory();
 
@@ -167,13 +168,34 @@ const Searchbar = () => {
         }
     }, [isAuthenticated]);
 
+    // FIXED: Updated click outside detection to handle both table positions
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (tableRef.current && !tableRef.current.contains(event.target) &&
-                bottomButtonRef.current && !bottomButtonRef.current.contains(event.target)) {
-                setOpenTable(false);
+            if (openTable) {
+                let clickedOutside = true;
+                
+                // Check if click is inside the button that triggered the table
+                if (bottomButtonRef.current && bottomButtonRef.current.contains(event.target)) {
+                    clickedOutside = false;
+                }
+                
+                // Check based on table position
+                if (tablePosition === 'searchbar') {
+                    if (tableRef.current && tableRef.current.contains(event.target)) {
+                        clickedOutside = false;
+                    }
+                } else if (tablePosition === 'bottom') {
+                    if (bottomTableRef.current && bottomTableRef.current.contains(event.target)) {
+                        clickedOutside = false;
+                    }
+                }
+                
+                if (clickedOutside) {
+                    setOpenTable(false);
+                }
             }
-        }
+        };
+        
         if (openTable) {
             document.addEventListener('mousedown', handleClickOutside);
         }
@@ -181,7 +203,7 @@ const Searchbar = () => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [openTable]);
+    }, [openTable, tablePosition]);
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -328,12 +350,17 @@ const Searchbar = () => {
                                 {columns.map((col, index) => (
                                     <TableCell
                                         key={index}
-                                        onClick={() => handleTableCategoryClick(col.categoryName)}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleTableCategoryClick(col.categoryName);
+                                        }}
                                         sx={{
                                             fontWeight: "bold",
                                             fontSize: "0.8rem",
                                             borderBottom: "none",
                                             cursor: "pointer",
+                                            userSelect: "none", // Prevent text selection
                                             '&:hover': { color: "#29B574" }
                                         }}
                                     >
@@ -350,12 +377,19 @@ const Searchbar = () => {
                                         return (
                                             <TableCell
                                                 key={colIndex}
-                                                onClick={() => sub && handleSubcategoryClick(sub)}
+                                                onClick={(e) => {
+                                                    if (sub) {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        handleSubcategoryClick(sub);
+                                                    }
+                                                }}
                                                 sx={{
                                                     fontSize: "0.7rem",
                                                     paddingY: "0.125rem",
                                                     borderBottom: "none",
                                                     cursor: sub ? "pointer" : "default",
+                                                    userSelect: "none", // Prevent text selection
                                                     '&:hover': sub ? { color: "#29B574" } : {}
                                                 }}
                                             >
@@ -562,17 +596,20 @@ const Searchbar = () => {
                         Categories
                     </Button>
                     
-                    {/* Categories-subcategories dropdown for bottom button */}
-                    <Box sx={{ 
-                        position: "absolute", 
-                        top: "100%", 
-                        left: 0, 
-                        right: 0, 
-                        zIndex: 1000,
-                        width: '92%',
-                        alignSelf: 'center',
-                        marginX: 'auto'
-                    }}>
+                    {/* Categories-subcategories dropdown for bottom button - FIXED with separate ref */}
+                    <Box 
+                        ref={bottomTableRef}
+                        sx={{ 
+                            position: "absolute", 
+                            top: "100%", 
+                            left: 0, 
+                            right: 0, 
+                            zIndex: 1000,
+                            width: '92%',
+                            alignSelf: 'center',
+                            marginX: 'auto'
+                        }}
+                    >
                         <CategoriesTable isBottom={true} />
                     </Box>
                 </Box>
