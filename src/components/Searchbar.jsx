@@ -343,8 +343,31 @@ const Searchbar = () => {
             overflow: "hidden" 
         }}>
             <Collapse in={openTable && ((isBottom && tablePosition === 'bottom') || (!isBottom && tablePosition === 'searchbar'))}>
-                <TableContainer component={Paper} elevation={0} sx={{ maxWidth: "100%", overflowX: "auto", backgroundColor: "#F2F2F2", mx: "auto" }}>
-                    <Table size="small">
+                <TableContainer 
+                    component={Paper} 
+                    elevation={0} 
+                    sx={{ 
+                        maxWidth: "100%", 
+                        overflowX: "auto", 
+                        backgroundColor: "#F2F2F2", 
+                        mx: "auto",
+                        // Ensure horizontal scrollbar is always visible when needed
+                        '&::-webkit-scrollbar': {
+                            height: '8px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                            backgroundColor: '#f1f1f1',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: '#888',
+                            borderRadius: '4px',
+                        },
+                        '&::-webkit-scrollbar-thumb:hover': {
+                            backgroundColor: '#555',
+                        },
+                    }}
+                >
+                    <Table size="small" sx={{ minWidth: 'max-content' }}>
                         <TableHead>
                             <TableRow>
                                 {columns.map((col, index) => (
@@ -361,6 +384,8 @@ const Searchbar = () => {
                                             borderBottom: "none",
                                             cursor: "pointer",
                                             userSelect: "none", // Prevent text selection
+                                            whiteSpace: "nowrap", // Prevent text wrapping
+                                            minWidth: "120px", // Ensure minimum width for readability
                                             '&:hover': { color: "#29B574" }
                                         }}
                                     >
@@ -390,6 +415,8 @@ const Searchbar = () => {
                                                     borderBottom: "none",
                                                     cursor: sub ? "pointer" : "default",
                                                     userSelect: "none", // Prevent text selection
+                                                    whiteSpace: "nowrap", // Prevent text wrapping
+                                                    minWidth: "120px", // Ensure minimum width for readability
                                                     '&:hover': sub ? { color: "#29B574" } : {}
                                                 }}
                                             >
